@@ -5,10 +5,13 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import {ConfigModule} from "@nestjs/config";
+import { JwtRefreshModule } from './jwt-refresh/jwt-refresh.module';
+import { JwtAccessService } from './jwt-access/jwt-access.service';
+import { JwtAccessModule } from './jwt-access/jwt-access.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), PrismaModule, UsersModule, AuthModule],
+  imports: [ConfigModule.forRoot(), PrismaModule, UsersModule, AuthModule, JwtRefreshModule, JwtAccessModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtAccessService],
 })
 export class AppModule {}

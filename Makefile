@@ -13,7 +13,7 @@ server:
 	nest start
 
 dev:
-	npm run start:dev
+	npm start
 
 shell:
 	docker compose exec -it app-server bash

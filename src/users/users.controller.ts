@@ -5,11 +5,20 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags} from "@nestjs/swagger";
 import {UserEntity} from "./entities/user.entity";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
+import * as process from "process";
 
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async get() {
+    console.log(process.env.DEBUG)
+    return new UserEntity(await this.usersService.get('ilya@mail.ru'))
+  }
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })

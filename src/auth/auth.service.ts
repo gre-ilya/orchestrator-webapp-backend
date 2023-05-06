@@ -11,11 +11,15 @@ import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+    constructor(
+        private prisma: PrismaService,
+        private jwtService: JwtService,
+        // private refresh: RefreshService
+    ) {}
 
     async login(email: string, password: string): Promise<AuthEntity> {
         // Step 1: Fetch a user with the given email
-        const user = await this.prisma.user.findUnique({ where: { email: email } });
+        const user = await this.prisma.user.findUnique({ where: { email: email } })
 
         // If no user is found, throw an error
         if (!user) {
@@ -30,9 +34,12 @@ export class AuthService {
             throw new UnauthorizedException('Invalid password');
         }
 
+        // await this.refresh.updateTokens(process.env.REFRESH)
+
         // Step 3: Generate a JWT containing the user's ID and return it
         return {
             accessToken: this.jwtService.sign({ userEmail: user.email }),
+            // refreshToken: this.jwtService.sign({ userEmail: user.email })
         };
     }
 }
