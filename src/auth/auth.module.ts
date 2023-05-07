@@ -7,17 +7,20 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import * as process from "process";
 import {UsersModule} from "../users/users.module";
 import {JwtStrategy} from "./jwt.strategy";
+import {JwtRefreshModule} from "../jwt-refresh/jwt-refresh.module";
+import {JwtAccessModule} from "../jwt-access/jwt-access.module";
 
-export const jwtSecret = process.env.JWT_SECRET;
+
 
 @Module({
   imports: [
     PrismaModule,
     PassportModule,
     JwtModule.register({
-      secret: jwtSecret,
-      signOptions: { expiresIn: '5m' },
+      secret: process.env.JWT_ACCESS_SECRET,
     }),
+    JwtAccessModule,
+    JwtRefreshModule,
     UsersModule,
   ],
   controllers: [AuthController],

@@ -13,11 +13,7 @@ export class UsersService {
     return this.prisma.user.create({ data: createUserDto });
   }
 
-  getAll() {
-    return this.prisma.user.findMany();
-  }
-
-  get(email: string) {
+  async get(email: string) {
     return this.prisma.user.findFirst({ where: { email: email } })
   }
 
@@ -28,7 +24,7 @@ export class UsersService {
     return this.prisma.user.update({ where: { email }, data: updateUserDto });
   }
 
-  remove(email: string) {
+  async remove(email: string) {
     return this.prisma.user.delete({ where: { email } });
   }
 }
