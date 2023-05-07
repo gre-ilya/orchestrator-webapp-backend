@@ -6,7 +6,7 @@ import * as process from "process";
 @Module({
   imports: [JwtModule.register({
     secret: process.env.JWT_ACCESS_SECRET,
-    signOptions: { expiresIn: '15m' }
+    signOptions: { expiresIn: '1m' }
   })],
   providers: [JwtAccessService],
   exports: [JwtAccessService]

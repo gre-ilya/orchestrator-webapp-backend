@@ -13,10 +13,11 @@ import { JwtRefreshController } from './jwt-refresh.controller';
       PrismaModule,
       JwtModule.register({
         secret: process.env.JWT_REFRESH_SECRET,
-        signOptions: { expiresIn: '30d' }
+        signOptions: { expiresIn: '1m' }
       })
   ],
   providers: [JwtRefreshService, JwtAccessService],
-  controllers: [JwtRefreshController]
+  controllers: [JwtRefreshController],
+  exports: [JwtRefreshService]
 })
 export class JwtRefreshModule {}

@@ -3,16 +3,16 @@ import {UserEntity} from "../../users/entities/user.entity";
 import {ApiProperty} from "@nestjs/swagger";
 import {Exclude} from "class-transformer";
 
-export class RefreshTokenEntity implements RefreshToken {
-    constructor({ user, ...data }: Partial<RefreshTokenEntity>) {
+export class RefreshTokenEntity {
+    constructor({ ...data }: Partial<RefreshTokenEntity>) {
         Object.assign(this, data);
-        if (user) {
-            this.user = new UserEntity(user);
-        }
     }
 
     @ApiProperty()
-    jti: string;
+    accessToken: string;
+
+    @ApiProperty()
+    refreshToken: string;
 
     @Exclude()
     createdAt: Date;
@@ -22,10 +22,4 @@ export class RefreshTokenEntity implements RefreshToken {
 
     @Exclude()
     deviceId: string;
-
-    @ApiProperty({ required: false, nullable: true })
-    userEmail: string | null;
-
-    @ApiProperty({ required: false, type: UserEntity })
-    user?: UserEntity;
 }

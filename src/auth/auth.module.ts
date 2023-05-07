@@ -7,7 +7,8 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import * as process from "process";
 import {UsersModule} from "../users/users.module";
 import {JwtStrategy} from "./jwt.strategy";
-import {RefreshModule} from "../jwt-tokens/refresh.module";
+import {JwtRefreshModule} from "../jwt-refresh/jwt-refresh.module";
+import {JwtAccessModule} from "../jwt-access/jwt-access.module";
 
 
 
@@ -17,10 +18,10 @@ import {RefreshModule} from "../jwt-tokens/refresh.module";
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET,
-      signOptions: { expiresIn: '1m' },
     }),
+    JwtAccessModule,
+    JwtRefreshModule,
     UsersModule,
-    RefreshModule
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

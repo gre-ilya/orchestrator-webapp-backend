@@ -16,7 +16,6 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async get() {
-    console.log(process.env.DEBUG)
     return new UserEntity(await this.usersService.get('ilya@mail.ru'))
   }
 

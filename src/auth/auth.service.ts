@@ -1,4 +1,3 @@
-//src/auth/auth.service.ts
 import {
     Injectable,
     NotFoundException,
@@ -8,12 +7,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { AuthEntity } from './entity/auth.entity';
 import * as bcrypt from 'bcrypt'
+import {JwtRefreshService} from "../jwt-refresh/jwt-refresh.service";
+import {JwtAccessService} from "../jwt-access/jwt-access.service";
 
 @Injectable()
 export class AuthService {
     constructor(
         private prisma: PrismaService,
-        private jwtService: JwtService,
+        private jwtAccessService: JwtAccessService,
+        private jwtRefreshService: JwtRefreshService
         // private refresh: RefreshService
     ) {}
 
@@ -34,12 +36,10 @@ export class AuthService {
             throw new UnauthorizedException('Invalid password');
         }
 
-        // await this.refresh.updateTokens(process.env.REFRESH)
-
         // Step 3: Generate a JWT containing the user's ID and return it
         return {
-            accessToken: this.jwtService.sign({ userEmail: user.email }),
-            // refreshToken: this.jwtService.sign({ userEmail: user.email })
+            accessToken: this.jwtAccessService.createAccessToken(user.email),
+            refreshToken: await this.jwtRefreshService.createRefreshToken(user.email)
         };
     }
 }
