@@ -13,8 +13,8 @@ export class UsersService {
     return this.prisma.user.create({ data: createUserDto });
   }
 
-  async get(email: string) {
-    return this.prisma.user.findFirst({ where: { email: email } })
+  async findOne(email: string) {
+    return this.prisma.user.findUnique({ where: { email: email } })
   }
 
   async update(email: string, updateUserDto: UpdateUserDto) {

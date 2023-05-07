@@ -2,21 +2,15 @@ import { Controller, Get, Post, Body, Patch, Delete, UseGuards, Request } from '
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {ApiBearerAuth, ApiCreatedResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags} from "@nestjs/swagger";
 import {UserEntity} from "./entities/user.entity";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
+import {ApiResponseModelProperty} from "@nestjs/swagger/dist/decorators/api-model-property.decorator";
 
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  async get(@Request() req) {
-    return new UserEntity(await this.usersService.get(req.user['email']))
-  }
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
@@ -24,10 +18,18 @@ export class UsersController {
     return new UserEntity(await this.usersService.create(createUserDto));
   }
 
-  @Patch()
-  @ApiCreatedResponse({ type: UserEntity })
+  @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ type: UserEntity })
+  async findOne(@Request() req) {
+    return new UserEntity(await this.usersService.findOne(req.user['email']))
+  }
+
+  @Patch()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UserEntity })
   async update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
     return new UserEntity(await this.usersService.update(req.user['email'], updateUserDto));
   }
@@ -35,7 +37,7 @@ export class UsersController {
   @Delete()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({ type: UserEntity })
+  @ApiOkResponse({ type: UserEntity })
   async remove(@Request() req) {
     return new UserEntity(await this.usersService.remove(req.user['email']));
   }
