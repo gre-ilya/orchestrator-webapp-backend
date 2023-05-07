@@ -4,7 +4,7 @@ import {JwtService} from "@nestjs/jwt";
 @Injectable()
 export class JwtAccessService {
     constructor(private jwtService: JwtService) {}
-    createAccessToken(email: string) {
-        return this.jwtService.sign({ email: email });
+    async createAccessToken(email: string) {
+        return this.jwtService.signAsync({ email: email });
     }
 }
