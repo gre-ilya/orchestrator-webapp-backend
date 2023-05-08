@@ -11,7 +11,7 @@ import {
   NotFoundException,
   Req
 } from '@nestjs/common';
-import { ProjectService } from './project.service';
+import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
@@ -20,8 +20,8 @@ import {ProjectEntity} from "./entities/project.entity";
 
 @Controller('projects')
 @ApiTags('projects')
-export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+export class ProjectsController {
+  constructor(private readonly projectService: ProjectsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)

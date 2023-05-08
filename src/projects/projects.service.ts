@@ -5,7 +5,7 @@ import {PrismaService} from "../prisma/prisma.service";
 import * as process from "process";
 
 @Injectable()
-export class ProjectService {
+export class ProjectsService {
   constructor(private prisma: PrismaService) {}
   async create(email: string, createProjectDto: CreateProjectDto) {
     return this.prisma.project.create({
