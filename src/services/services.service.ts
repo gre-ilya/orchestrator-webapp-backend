@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
+import {HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import {PrismaService} from "../prisma/prisma.service";
@@ -51,7 +51,7 @@ export class ServicesService {
     return result;
   }
 
-  async update(id: number, updateServiceDto: UpdateServiceDto) {
+  async update(email: string, projectId: string, id: string, updateServiceDto: UpdateServiceDto) {
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
@@ -59,12 +59,22 @@ export class ServicesService {
       }
     })
     if (!project) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
-    return `This action updates a #${id} service`;
+    const updateAmount = await this.prisma.service.updateMany({
+      where: {
+        id: id,
+        projectId: projectId
+      },
+      data: updateServiceDto
+    });
+    if (!updateAmount.count) {
+      throw new NotFoundException();
+    }
+    return HttpStatus.OK;
   }
 
-  async remove(id: number) {
+  async remove(email: string, projectId: string, id: string) {
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
@@ -74,6 +84,15 @@ export class ServicesService {
     if (!project) {
       throw new NotFoundException()
     }
-    return `This action removes a #${id} service`;
+    const deletedAmount = await this.prisma.service.deleteMany({
+      where: {
+        id: id,
+        projectId: projectId
+      }
+    })
+    if (!deletedAmount.count) {
+      throw new NotFoundException();
+    }
+    return HttpStatus.OK;
   }
 }

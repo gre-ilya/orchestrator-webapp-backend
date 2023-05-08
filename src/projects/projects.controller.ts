@@ -54,9 +54,9 @@ export class ProjectsController {
   @Patch(':uuid')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse( { type: ProjectEntity })
+  @ApiOkResponse()
   async update(@Request() req, @Param('uuid') uuid: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return new ProjectEntity(await this.projectService.update(req.user.email ,uuid, updateProjectDto));
+    return this.projectService.update(req.user.email ,uuid, updateProjectDto);
   }
 
   @Delete('uuid')

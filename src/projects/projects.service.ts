@@ -34,7 +34,7 @@ export class ProjectsService {
     if (!updatedAmount.count) {
       throw new NotFoundException();
     }
-    return this.findOne(email, uuid);
+    return HttpStatus.OK;
   }
 
   async remove(email: string, uuid: string) {
