@@ -4,9 +4,17 @@ import {Exclude} from "class-transformer";
 
 export class JsonObject implements Prisma.JsonObject {}
 
-export class ServiceEntity implements Service {
-    constructor(partial: Partial<ServiceEntity>) {
+export class ServicePreviewEntity implements Service {
+    constructor(partial: Partial<ServicePreviewEntity>) {
         Object.assign(this, partial);
+    }
+
+    static handleArray(partialArray: Partial<ServicePreviewEntity[]>) {
+        let result: ServicePreviewEntity[] = [];
+        partialArray.forEach((val, index) => {
+            result.push(new ServicePreviewEntity(val));
+        })
+        return result;
     }
 
     @ApiProperty()
@@ -15,25 +23,25 @@ export class ServiceEntity implements Service {
     @ApiProperty()
     name: string;
 
-    @ApiProperty()
+    @Exclude()
     repository: string;
 
-    @ApiProperty()
+    @Exclude()
     builderTemplate: number;
 
-    @ApiProperty()
+    @Exclude()
     buildCommand: string;
 
-    @ApiProperty()
+    @Exclude()
     deployCommand: string;
 
-    @ApiProperty()
+    @Exclude()
     ip: string;
 
-    @ApiProperty()
+    @Exclude()
     port: number;
 
-    @ApiProperty()
+    @Exclude()
     variables: JsonObject;
 
     @Exclude()

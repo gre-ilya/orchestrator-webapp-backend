@@ -5,7 +5,8 @@ import { UpdateServiceDto } from './dto/update-service.dto';
 import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiProperty, ApiTags} from "@nestjs/swagger";
 import {ServiceEntity} from "./entities/service.entity";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
-import {requireProject} from "../project/project.decorator";
+import {isArray} from "class-validator";
+import {ServicePreviewEntity} from "./entities/service-preview.entity";
 
 @Controller('project/:project/service')
 @ApiTags('services')
@@ -24,10 +25,10 @@ export class ServiceController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: [ServiceEntity] })
+  @ApiOkResponse({ type: [ServicePreviewEntity] })
   @ApiParam({ name: 'project', required: true })
   async findAll(@Request() req, @Param() params) {
-    return ServiceEntity.handleArray(await this.servicesService.findAll(req.user.email, params.project));
+    return ServicePreviewEntity.handleArray(await this.servicesService.findAll(req.user.email, params.project));
   }
 
   @Get(':service')
