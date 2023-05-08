@@ -17,22 +17,63 @@ export class ServicesService {
     if (!project) {
       throw new NotFoundException()
     }
+    createServiceDto.projectId = projectId;
     return this.prisma.service.create({ data: createServiceDto });
   }
 
-  findAll() {
-    return `This action returns all services`;
+  async findAll(email: string, projectId: string) {
+    const project = await this.prisma.project.findMany({
+      where: {
+        id: projectId,
+        userEmail: email
+      }
+    })
+    if (!project) {
+      throw new NotFoundException()
+    }
+    return this.prisma.service.findMany({ where: { projectId: projectId } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} service`;
+  async findOne(email: string, projectId: string, id: string) {
+    const project = await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        userEmail: email
+      }
+    })
+    if (!project) {
+      throw new NotFoundException()
+    }
+    const result = await this.prisma.service.findFirst({ where: { id: id, projectId: projectId } });
+    if (!result) {
+      throw new NotFoundException();
+    }
+    return result;
   }
 
-  update(id: number, updateServiceDto: UpdateServiceDto) {
+  async update(id: number, updateServiceDto: UpdateServiceDto) {
+    const project = await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        userEmail: email
+      }
+    })
+    if (!project) {
+      throw new NotFoundException()
+    }
     return `This action updates a #${id} service`;
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const project = await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        userEmail: email
+      }
+    })
+    if (!project) {
+      throw new NotFoundException()
+    }
     return `This action removes a #${id} service`;
   }
 }
