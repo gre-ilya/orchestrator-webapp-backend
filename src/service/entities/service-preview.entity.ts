@@ -1,4 +1,4 @@
-import {Prisma, Service} from "@prisma/client";
+import {DeploymentStatus, Prisma, Service} from "@prisma/client";
 import {ApiProperty} from "@nestjs/swagger";
 import {Exclude} from "class-transformer";
 
@@ -40,6 +40,9 @@ export class ServicePreviewEntity implements Service {
 
     @Exclude()
     port: number;
+
+    @ApiProperty()
+    status: DeploymentStatus;
 
     @Exclude()
     variables: JsonObject;

@@ -1,4 +1,4 @@
-import {Prisma, Service} from "@prisma/client";
+import {DeploymentStatus, Prisma, Service} from "@prisma/client";
 import {ApiProperty} from "@nestjs/swagger";
 import {Exclude} from "class-transformer";
 
@@ -32,6 +32,9 @@ export class ServiceEntity implements Service {
 
     @ApiProperty()
     port: number;
+
+    @ApiProperty()
+    status: DeploymentStatus;
 
     @ApiProperty()
     variables: JsonObject;
