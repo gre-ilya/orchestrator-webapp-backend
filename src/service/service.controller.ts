@@ -5,6 +5,7 @@ import { UpdateServiceDto } from './dto/update-service.dto';
 import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiProperty, ApiTags} from "@nestjs/swagger";
 import {ServiceEntity} from "./entities/service.entity";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
+import {requireProject} from "../project/project.decorator";
 
 @Controller('project/:project/service')
 @ApiTags('services')
