@@ -1,4 +1,16 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  NotFoundException,
+  Req
+} from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -16,7 +28,7 @@ export class ProjectController {
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: ProjectEntity })
   async create(@Request() req, @Body() createProjectDto: CreateProjectDto) {
-    return await this.projectService.create(req.user['email'], createProjectDto);
+    return new ProjectEntity(await this.projectService.create(req.user.email, createProjectDto));
   }
 
   @Get()
@@ -24,30 +36,34 @@ export class ProjectController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: [ProjectEntity] })
   async findAll(@Request() req) {
-    return this.projectService.findAll(req.user['email']);
+    return ProjectEntity.handleArray(await this.projectService.findAll(req.user.email));
   }
 
   @Get(':uuid')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProjectEntity })
-  async findOne(@Param('uuid') uuid: string) {
-    return this.projectService.findOne(uuid);
+  async findOne(@Request() req, @Param('uuid') uuid: string) {
+    const result = await this.projectService.findOne(req.user.email, uuid);
+    if (!result) {
+      throw new NotFoundException();
+    }
+    return new ProjectEntity(result);
   }
 
   @Patch(':uuid')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse( { type: ProjectEntity })
-  async update(@Param('uuid') uuid: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update(uuid, updateProjectDto);
+  async update(@Request() req, @Param('uuid') uuid: string, @Body() updateProjectDto: UpdateProjectDto) {
+    return new ProjectEntity(await this.projectService.update(req.user.email ,uuid, updateProjectDto));
   }
 
   @Delete('uuid')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: ProjectEntity })
-  async remove(@Param('uuid') uuid: string) {
-    return this.projectService.remove(uuid);
+  @ApiOkResponse()
+  async remove(@Request() req, @Param('uuid') uuid: string) {
+    return await this.projectService.remove(req.user.email, uuid);
   }
 }

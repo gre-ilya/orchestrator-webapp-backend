@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from "../prisma/prisma.service";
@@ -25,6 +25,7 @@ export class UsersService {
   }
 
   async remove(email: string) {
-    return this.prisma.user.delete({ where: { email } });
+    await this.prisma.user.delete({ where: { email } });
+    return HttpStatus.OK;
   }
 }
