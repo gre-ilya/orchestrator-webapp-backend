@@ -27,16 +27,25 @@ export class ServicesController {
   }
 
   @Get(':service')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: ServiceEntity })
   async findOne(@Request() req, @Param('project') project: string, @Param('service') service) {
     return this.servicesService.findOne(req.user.email, project, service);
   }
 
   @Patch(':service')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse()
   async update(@Request() req, @Param('project') project: string, @Param('service') service, @Body() updateServiceDto: UpdateServiceDto) {
     return this.servicesService.update(req.user.email, project, service, updateServiceDto);
   }
 
   @Delete(':service')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse()
   async remove(@Request() req, @Param('project') project: string, @Param('service') service: string) {
     return this.servicesService.remove(req.user.email, project, service);
   }
