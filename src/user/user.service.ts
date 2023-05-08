@@ -5,7 +5,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UsersService {
+export class UserService {
 
   constructor(private prisma: PrismaService) {}
   async create(createUserDto: CreateUserDto) {

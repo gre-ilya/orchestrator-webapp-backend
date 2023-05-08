@@ -5,7 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import * as process from "process";
-import {UsersModule} from "../users/users.module";
+import {UserModule} from "../user/user.module";
 import {JwtStrategy} from "./jwt.strategy";
 import {JwtRefreshModule} from "../jwt-refresh/jwt-refresh.module";
 import {JwtAccessModule} from "../jwt-access/jwt-access.module";
@@ -21,7 +21,7 @@ import {JwtAccessModule} from "../jwt-access/jwt-access.module";
     }),
     JwtAccessModule,
     JwtRefreshModule,
-    UsersModule,
+    UserModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

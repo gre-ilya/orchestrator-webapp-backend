@@ -15,7 +15,7 @@ import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiProperty, ApiTags} from "@nestjs/swagger";
 import {ProjectEntity} from "./entities/project.entity";
 
 @Controller('projects')
@@ -39,31 +39,34 @@ export class ProjectController {
     return ProjectEntity.handleArray(await this.projectService.findAll(req.user.email));
   }
 
-  @Get(':uuid')
+  @Get(':project')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProjectEntity })
-  async findOne(@Request() req, @Param('uuid') uuid: string) {
-    const result = await this.projectService.findOne(req.user.email, uuid);
+  @ApiParam({ name: 'project', required: true })
+  async findOne(@Request() req, @Param() params) {
+    const result = await this.projectService.findOne(req.user.email, params.project);
     if (!result) {
       throw new NotFoundException();
     }
     return new ProjectEntity(result);
   }
 
-  @Patch(':uuid')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse( { type: ProjectEntity })
-  async update(@Request() req, @Param('uuid') uuid: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return new ProjectEntity(await this.projectService.update(req.user.email ,uuid, updateProjectDto));
-  }
-
-  @Delete('uuid')
+  @Patch(':project')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
-  async remove(@Request() req, @Param('uuid') uuid: string) {
-    return await this.projectService.remove(req.user.email, uuid);
+  @ApiParam({ name: 'project', required: true })
+  async update(@Request() req, @Param() params, @Body() updateProjectDto: UpdateProjectDto) {
+    return this.projectService.update(req.user.email ,params.project, updateProjectDto);
+  }
+
+  @Delete(':project')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse()
+  @ApiParam({ name: 'project', required: true })
+  async remove(@Request() req, @Param() params) {
+    return await this.projectService.remove(req.user.email, params.project);
   }
 }
