@@ -3,6 +3,17 @@ import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient {
+    constructor() {
+        if (process.env.DEBUG == 'true') {
+            super({
+                log: ['query']
+            });
+        } else {
+            super();
+        }
+    }
+
+
     async enableShutdownHooks(app: INestApplication) {
         this.$on('beforeExit', async () => {
             await app.close();

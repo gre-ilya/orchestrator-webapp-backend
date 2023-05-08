@@ -23,7 +23,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async findOne(@Request() req) {
-    return new UserEntity(await this.usersService.findOne(req.user['email']))
+    return new UserEntity(await this.usersService.findOne(req.user.email));
   }
 
   @Patch()
@@ -31,14 +31,14 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
-    return new UserEntity(await this.usersService.update(req.user['email'], updateUserDto));
+    return new UserEntity(await this.usersService.update(req.user.email, updateUserDto));
   }
 
   @Delete()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: UserEntity })
+  @ApiOkResponse()
   async remove(@Request() req) {
-    return new UserEntity(await this.usersService.remove(req.user['email']));
+    return await this.usersService.remove(req.user.email);
   }
 }

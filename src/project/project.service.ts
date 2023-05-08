@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import {PrismaService} from "../prisma/prisma.service";
+import * as process from "process";
 
 @Injectable()
 export class ProjectService {
@@ -19,15 +20,31 @@ export class ProjectService {
     return this.prisma.project.findMany({ where: { userEmail: email } })
   }
 
-  async findOne(id: string) {
-    return this.prisma.service.findUnique({ where: { id } });
+  async findOne(email: string, uuid: string) {
+    return this.prisma.project.findFirst({
+      where: {
+        id: uuid,
+        userEmail: email
+      }
+    });
   }
 
-  async update(id: string, updateProjectDto: UpdateProjectDto) {
-    return this.prisma.project.update({ where: { id }, data: updateProjectDto });
+  async update(email: string, uuid: string, updateProjectDto: UpdateProjectDto) {
+    const updatedAmount = await this.prisma.project.updateMany({ where: { id: uuid, userEmail: email }, data: updateProjectDto });
+    if (!updatedAmount.count) {
+      throw new NotFoundException();
+    }
+    return this.findOne(email, uuid);
   }
 
-  async remove(id: string) {
-    return this.prisma.project.delete({ where: { id } });
+  async remove(email: string, uuid: string) {
+    const res = await this.prisma.project.deleteMany({ where: {
+      id: uuid,
+      userEmail: email
+    } });
+    if (res.count) {
+      return HttpStatus.OK;
+    }
+    throw new NotFoundException();
   }
 }
