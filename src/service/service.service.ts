@@ -4,7 +4,7 @@ import { UpdateServiceDto } from './dto/update-service.dto';
 import {PrismaService} from "../prisma/prisma.service";
 
 @Injectable()
-export class ServicesService {
+export class ServiceService {
 
   constructor(private prisma: PrismaService) {}
   async create(email: string, projectId: string, createServiceDto: CreateServiceDto) {
@@ -65,8 +65,7 @@ export class ServicesService {
       where: {
         id: id,
         projectId: projectId
-      },
-      data: updateServiceDto
+      }, data: updateServiceDto
     });
     if (!updateAmount.count) {
       throw new NotFoundException();

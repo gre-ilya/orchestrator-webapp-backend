@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Delete, UseGuards, Request } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags} from "@nestjs/swagger";
@@ -7,10 +7,10 @@ import {UserEntity} from "./entities/user.entity";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {ApiResponseModelProperty} from "@nestjs/swagger/dist/decorators/api-model-property.decorator";
 
-@Controller('users')
-@ApiTags('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+@Controller('user')
+@ApiTags('user')
+export class UserController {
+  constructor(private readonly usersService: UserService) {}
 
   @Post()
   @ApiCreatedResponse({ type: UserEntity })

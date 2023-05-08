@@ -9,6 +9,14 @@ export class ServiceEntity implements Service {
         Object.assign(this, partial);
     }
 
+    static handleArray(partialArray: Partial<ServiceEntity[]>) {
+        let result: ServiceEntity[] = [];
+        partialArray.forEach((val, index) => {
+            result.push(new ServiceEntity(val));
+        })
+        return result;
+    }
+
     @ApiProperty()
     id: string;
 

@@ -5,7 +5,7 @@ import {PrismaService} from "../prisma/prisma.service";
 import * as process from "process";
 
 @Injectable()
-export class ProjectsService {
+export class ProjectService {
   constructor(private prisma: PrismaService) {}
   async create(email: string, createProjectDto: CreateProjectDto) {
     return this.prisma.project.create({
@@ -42,9 +42,9 @@ export class ProjectsService {
       id: uuid,
       userEmail: email
     } });
-    if (res.count) {
-      return HttpStatus.OK;
+    if (!res.count) {
+      throw new NotFoundException();
     }
-    throw new NotFoundException();
+    return HttpStatus.OK;
   }
 }
