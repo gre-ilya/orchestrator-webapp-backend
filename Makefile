@@ -1,3 +1,5 @@
+.PHONY: test
+
 all: down build up
 
 up:
@@ -20,3 +22,7 @@ shell:
 
 lint:
 	npm run lint
+
+test:
+	npm run test
+
