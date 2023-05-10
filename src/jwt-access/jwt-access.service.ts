@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import {JwtService} from "@nestjs/jwt";
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAccessService {
-    constructor(private jwtService: JwtService) {}
-    async createAccessToken(email: string) {
-        return this.jwtService.signAsync({ email: email });
-    }
+  constructor(private jwtService: JwtService) {}
+  async createAccessToken(email: string) {
+    return this.jwtService.signAsync({ email: email });
+  }
 }

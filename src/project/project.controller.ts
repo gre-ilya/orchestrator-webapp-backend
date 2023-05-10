@@ -9,14 +9,21 @@ import {
   UseGuards,
   Request,
   NotFoundException,
-  Req
+  Req,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import {JwtAuthGuard} from "../auth/jwt-auth.guard";
-import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiProperty, ApiTags} from "@nestjs/swagger";
-import {ProjectEntity} from "./entities/project.entity";
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiProperty,
+  ApiTags,
+} from '@nestjs/swagger';
+import { ProjectEntity } from './entities/project.entity';
 
 @Controller('projects')
 @ApiTags('projects')
@@ -28,7 +35,9 @@ export class ProjectController {
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: ProjectEntity })
   async create(@Request() req, @Body() createProjectDto: CreateProjectDto) {
-    return new ProjectEntity(await this.projectService.create(req.user.email, createProjectDto));
+    return new ProjectEntity(
+      await this.projectService.create(req.user.email, createProjectDto),
+    );
   }
 
   @Get()
@@ -36,7 +45,9 @@ export class ProjectController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: [ProjectEntity] })
   async findAll(@Request() req) {
-    return ProjectEntity.handleArray(await this.projectService.findAll(req.user.email));
+    return ProjectEntity.handleArray(
+      await this.projectService.findAll(req.user.email),
+    );
   }
 
   @Get(':project')
@@ -45,7 +56,10 @@ export class ProjectController {
   @ApiOkResponse({ type: ProjectEntity })
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
-    const result = await this.projectService.findOne(req.user.email, params.project);
+    const result = await this.projectService.findOne(
+      req.user.email,
+      params.project,
+    );
     if (!result) {
       throw new NotFoundException();
     }
@@ -57,8 +71,16 @@ export class ProjectController {
   @ApiBearerAuth()
   @ApiOkResponse()
   @ApiParam({ name: 'project', required: true })
-  async update(@Request() req, @Param() params, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update(req.user.email ,params.project, updateProjectDto);
+  async update(
+    @Request() req,
+    @Param() params,
+    @Body() updateProjectDto: UpdateProjectDto,
+  ) {
+    return this.projectService.update(
+      req.user.email,
+      params.project,
+      updateProjectDto,
+    );
   }
 
   @Delete(':project')

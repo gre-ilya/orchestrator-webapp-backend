@@ -11,61 +11,61 @@ datasource db {
 }
 
 model User {
-  email String @id @db.VarChar(128)
-  passwordHash String @db.VarChar(256)
-  role UserRole @default(User)
-  isActivated Boolean @default(false)
-  activationLink String? @db.VarChar(256)
+  email          String   @id @db.VarChar(128)
+  passwordHash   String   @db.VarChar(256)
+  role           UserRole @default(User)
+  isActivated    Boolean  @default(false)
+  activationLink String?  @db.VarChar(256)
 
   refreshTokens RefreshToken[]
-  projects Project[]
+  projects      Project[]
 }
 
 model RefreshToken {
-  jti String @id @db.VarChar(255)
+  jti       String   @id @db.VarChar(255)
   createdAt DateTime @default(now())
-  revoked Boolean @default(false)
-  deviceId String @db.Uuid()
+  revoked   Boolean  @default(false)
+  deviceId  String   @db.Uuid()
 
-  user User @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  user      User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
   userEmail String
 }
 
 model Project {
-  id String @id @db.Uuid() @default(uuid())
+  id   String @id @default(uuid()) @db.Uuid()
   name String @db.VarChar(128)
 
-  user User @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  user      User      @relation(fields: [userEmail], references: [email], onDelete: Cascade)
   userEmail String
-  services Service[]
+  services  Service[]
 }
 
 model Service {
-  id String @id @db.Uuid() @default(uuid())
-  name String @db.VarChar(128)
-  repository String @db.VarChar(256)
+  id              String           @id @default(uuid()) @db.Uuid()
+  name            String           @db.VarChar(128)
+  repository      String           @db.VarChar(256)
   builderTemplate Int?
-  buildCommand String? @db.VarChar(128)
-  deployCommand String? @db.VarChar(128)
-  ip String? @db.VarChar(15)
-  port Int?
-  status DeploymentStatus @default(Inactive)
-  variables Json?
+  buildCommand    String?          @db.VarChar(128)
+  deployCommand   String?          @db.VarChar(128)
+  ip              String?          @db.VarChar(15)
+  port            Int?
+  status          DeploymentStatus @default(Inactive)
+  variables       Json?
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String @db.Uuid()
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String       @db.Uuid()
   deployments Deployment[]
 }
 
 model Deployment {
-  id String @id @db.Uuid() @default(uuid())
-  buildLogs String @db.VarChar(32768)
-  deployLogs String @db.VarChar(32768)
-  status DeploymentStatus @default(Building)
-  buildDate DateTime @default(now())
+  id         String           @id @default(uuid()) @db.Uuid()
+  buildLogs  String           @db.VarChar(32768)
+  deployLogs String           @db.VarChar(32768)
+  status     DeploymentStatus @default(Building)
+  buildDate  DateTime         @default(now())
 
-  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  serviceId String @db.Uuid()
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId String  @db.Uuid()
 }
 
 enum UserRole {

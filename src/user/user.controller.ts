@@ -1,11 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Delete, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags} from "@nestjs/swagger";
-import {UserEntity} from "./entities/user.entity";
-import {JwtAuthGuard} from "../auth/jwt-auth.guard";
-import {ApiResponseModelProperty} from "@nestjs/swagger/dist/decorators/api-model-property.decorator";
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { UserEntity } from './entities/user.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiResponseModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
+import * as process from 'process';
 
 @Controller('user')
 @ApiTags('user')
@@ -31,7 +46,9 @@ export class UserController {
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   async update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
-    return new UserEntity(await this.usersService.update(req.user.email, updateUserDto));
+    return new UserEntity(
+      await this.usersService.update(req.user.email, updateUserDto),
+    );
   }
 
   @Delete()
