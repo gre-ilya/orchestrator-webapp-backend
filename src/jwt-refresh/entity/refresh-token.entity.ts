@@ -1,25 +1,25 @@
-import {RefreshToken} from "@prisma/client";
-import {UserEntity} from "../../user/entities/user.entity";
-import {ApiProperty} from "@nestjs/swagger";
-import {Exclude} from "class-transformer";
+import { RefreshToken } from '@prisma/client';
+import { UserEntity } from '../../user/entities/user.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 export class RefreshTokenEntity {
-    constructor({ ...data }: Partial<RefreshTokenEntity>) {
-        Object.assign(this, data);
-    }
+  constructor({ ...data }: Partial<RefreshTokenEntity>) {
+    Object.assign(this, data);
+  }
 
-    @ApiProperty()
-    accessToken: string;
+  @ApiProperty()
+  accessToken: string;
 
-    @ApiProperty()
-    refreshToken: string;
+  @ApiProperty()
+  refreshToken: string;
 
-    @Exclude()
-    createdAt: Date;
+  @Exclude()
+  createdAt: Date;
 
-    @Exclude()
-    revoked: boolean;
+  @Exclude()
+  revoked: boolean;
 
-    @Exclude()
-    deviceId: string;
+  @Exclude()
+  deviceId: string;
 }

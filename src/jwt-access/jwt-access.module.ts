@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { JwtAccessService } from './jwt-access.service';
-import {JwtModule} from "@nestjs/jwt";
-import * as process from "process";
+import { JwtModule } from '@nestjs/jwt';
+import * as process from 'process';
 
 @Module({
-  imports: [JwtModule.register({
-    secret: process.env.JWT_ACCESS_SECRET,
-    signOptions: { expiresIn: '30m' }
-  })],
+  imports: [
+    JwtModule.register({
+      secret: process.env.JWT_ACCESS_SECRET,
+      signOptions: { expiresIn: '30m' },
+    }),
+  ],
   providers: [JwtAccessService],
-  exports: [JwtAccessService]
+  exports: [JwtAccessService],
 })
 export class JwtAccessModule {}

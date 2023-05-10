@@ -3,6 +3,8 @@ services:
   postgres:
     image: 'postgres:13.5-alpine'
     hostname: '${POSTGRES_HOST}'
+    profiles:
+      - 'prod'
     volumes:
       - 'postgres_volume:/var/lib/postgresql/data'
     ports:
@@ -10,10 +12,26 @@ services:
     env_file:
       - './.env'
 
+  postgres-for-test:
+    image: 'postgres:13.5-alpine'
+    hostname: '${POSTGRES_HOST}'
+    profiles:
+      - 'test'
+    volumes:
+      - 'postgres_test_volume:/var/lib/postgresql/data'
+    ports:
+      - '5432:5432'
+    env_file:
+      - './.env'
+
   app-server:
     build: '.'
+    profiles:
+      - 'prod'
+      - 'test'
     depends_on:
       - 'postgres'
+      - 'postgres-for-test'
     volumes:
       - './:/app-dir'
     command: bash -c 'tail -f /dev/null'
@@ -22,3 +40,4 @@ services:
 
 volumes:
   postgres_volume:
+  postgres_test_volume:
