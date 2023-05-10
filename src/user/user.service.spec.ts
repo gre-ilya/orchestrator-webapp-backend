@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import * as process from 'process';
 import { CreateUserDto } from './dto/create-user.dto';
+import {ConflictException} from "@nestjs/common";
 
 describe('UsersService', () => {
   let service: UserService;
@@ -21,24 +22,29 @@ describe('UsersService', () => {
     await prisma.user.delete({ where: { email: 'anna@mail.ru' } })
   })
 
-  it('should be defined', () => {
+  it('Should be defined.', () => {
     expect(service).toBeDefined();
     expect(prisma).toBeDefined();
   });
 
   describe('create', () => {
     it('Should return created object.', async () => {
+      const createdUserPassword = 'superpass';
       const expectedUser = {
         email: 'anna@mail.ru',
         role: 'User',
-        passwordHash: await bcrypt.hash('superpass', +process.env.BCRYPT_SALTORROUNDS),
+        passwordHash: expect.any(String),
         isActivated: false,
         activationLink: null,
       };
-      expect(
-        await service.create(new CreateUserDto('anna@mail.ru', 'superpass')),
-      ).toStrictEqual(expectedUser);
+      const returnedValue = await service.create(new CreateUserDto('anna@mail.ru', createdUserPassword));
+      expect(returnedValue).toStrictEqual(expectedUser);
+      expect(bcrypt.compare(createdUserPassword, returnedValue.passwordHash)).toBeTruthy();
     });
+
+    it('Should throw ConflictException.', async () => {
+      await expect(service.create(new CreateUserDto('anna@mail.ru', 'superpass'))).rejects.toThrow(ConflictException);
+    })
   });
 
 });
