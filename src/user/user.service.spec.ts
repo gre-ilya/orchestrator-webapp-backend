@@ -13,6 +13,10 @@ import {PrismaModule} from "../prisma/prisma.module";
 describe('UsersService (integration)', () => {
   let service: UserService;
   let prisma: PrismaService;
+  const test_user = {
+    email: 'anna@mail.ru',
+    password: 'superpass'
+  }
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,34 +34,33 @@ describe('UsersService (integration)', () => {
 
   describe('create', () => {
     it('Should return created object.', async () => {
-      const createdUserPassword = 'superpass';
       const expectedUser = {
-        email: 'anna@mail.ru',
+        email: test_user.email,
         role: 'User',
         password: expect.any(String),
         isActivated: false,
         activationLink: null,
       };
-      const returnedValue = await service.create(new CreateUserDto('anna@mail.ru', createdUserPassword));
+      const returnedValue = await service.create(new CreateUserDto(test_user.email, test_user.password));
       expect(returnedValue).toStrictEqual(expectedUser);
-      expect(bcrypt.compare(createdUserPassword, returnedValue.password)).toBeTruthy();
+      expect(bcrypt.compare(test_user.password, returnedValue.password)).toBeTruthy();
     });
 
     it('Should throw ConflictException.', async () => {
-      await expect(service.create(new CreateUserDto('anna@mail.ru', 'superpass'))).rejects.toThrow(ConflictException);
+      await expect(service.create(new CreateUserDto(test_user.email, test_user.password))).rejects.toThrow(ConflictException);
     });
   });
 
   describe('findOne', () => {
     it('Should return found object.', async () => {
       const expectedUser = {
-        email: 'anna@mail.ru',
+        email: test_user.email,
         role: 'User',
         password: expect.any(String),
         isActivated: false,
         activationLink: null,
       };
-      expect(await service.findOne('anna@mail.ru')).toStrictEqual(expectedUser);
+      expect(await service.findOne(test_user.email)).toStrictEqual(expectedUser);
     });
 
     it('Should throw NotFoundException.', async () => {
@@ -69,13 +72,13 @@ describe('UsersService (integration)', () => {
     it('Should update user credentials.', async () => {
       let activationLink: string = 'https://superlink.ru';
       const expectedUser = {
-        email: 'anna@mail.ru',
+        email: test_user.email,
         role: UserRole.Admin,
         password: expect.any(String),
         isActivated: true,
         activationLink: activationLink
       };
-      expect(await service.update('anna@mail.ru', new UpdateUserDto({
+      expect(await service.update(test_user.email, new UpdateUserDto({
         role: UserRole.Admin,
         isActivated: true,
         activationLink: activationLink
@@ -91,11 +94,17 @@ describe('UsersService (integration)', () => {
 
   describe('remove', () => {
     it('Should remove user from database.', async () => {
-      expect(await service.remove('anna@mail.ru')).toBe(HttpStatus.OK);
+      expect(await service.remove(test_user.email)).toBe(HttpStatus.OK);
     })
     it('Should throw NotFoundException.', async () => {
-      await expect(service.remove('anna@mail.ru')).rejects.toThrow(NotFoundException);
+      await expect(service.remove(test_user.email)).rejects.toThrow(NotFoundException);
     })
-  })
+  });
+
+  afterAll(async () => {
+      try {
+        await service.remove(test_user.email);
+      } catch (err) {}
+    });
 
 });
