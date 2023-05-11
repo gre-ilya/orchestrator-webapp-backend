@@ -19,8 +19,6 @@ import {
 } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiResponseModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
-import * as process from 'process';
 
 @Controller('user')
 @ApiTags('user')
