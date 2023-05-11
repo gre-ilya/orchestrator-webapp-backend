@@ -10,7 +10,7 @@ import {
 export class CreateUserDto {
   constructor(email, password) {
     this.email = email;
-    this.passwordHash = password;
+    this.password = password;
   }
 
   @IsEmail()
@@ -22,5 +22,5 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(8)
   @ApiProperty()
-  passwordHash: string;
+  password: string;
 }

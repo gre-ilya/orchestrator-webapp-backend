@@ -40,5 +40,8 @@ lint:
 migrate:
 	npx prisma migrate dev
 
-run-test:
+test-run:
 	npm run test
+
+test-watch:
+	npm run test:watch

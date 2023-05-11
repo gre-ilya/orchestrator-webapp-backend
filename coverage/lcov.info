@@ -1018,7 +1018,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:src/user/user.controller.specc.ts
+SF:src/user/user.controller.spec.ts
 FN:5,(anonymous_0)
 FN:8,(anonymous_1)
 FN:17,(anonymous_2)

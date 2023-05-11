@@ -615,7 +615,7 @@
     </package>
     <package name="src.user">
       <metrics statements="44" coveredstatements="5" conditionals="1" coveredconditionals="0" methods="13" coveredmethods="1"/>
-      <file name="user.controller.specc.ts" path="/app-dir/src/user/user.controller.specc.ts">
+      <file name="user.controller.spec.ts" path="/app-dir/src/user/user.controller.spec.ts">
         <metrics statements="9" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="0"/>
         <line num="1" count="0" type="stmt"/>
         <line num="2" count="0" type="stmt"/>
