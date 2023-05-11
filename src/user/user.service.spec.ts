@@ -10,7 +10,7 @@ import {UserRole} from "@prisma/client";
 import {exploreApiProducesMetadata} from "@nestjs/swagger/dist/explorers/api-produces.explorer";
 import {PrismaModule} from "../prisma/prisma.module";
 
-describe('UsersService', () => {
+describe('UsersService (integration)', () => {
   let service: UserService;
   let prisma: PrismaService;
 

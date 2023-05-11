@@ -11,7 +11,7 @@ down:
 build:
 	docker compose --profile prod build
 
-test: down-test build-test up-test
+all-test: down-test build-test up-test
 
 up-test:
 	docker compose --profile test up -d
@@ -21,9 +21,6 @@ down-test:
 
 build-test:
 	docker compose --profile test build
-
-watch:
-	npm run test:watch
 
 server:
 	nest start
@@ -40,8 +37,11 @@ lint:
 migrate:
 	npx prisma migrate dev
 
-test-run:
+test:
 	npm run test
 
-test-watch:
+e2e:
+	npm run test:e2e
+
+watch:
 	npm run test:watch
