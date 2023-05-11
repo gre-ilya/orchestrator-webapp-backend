@@ -3,9 +3,7 @@ import {ClassSerializerInterceptor, INestApplication, ValidationPipe} from '@nes
 import * as request from 'supertest';
 import {Reflector} from "@nestjs/core";
 import {UserService} from "../src/user/user.service";
-import {CreateUserDto} from "../src/user/dto/create-user.dto";
 import {AppModule} from "../src/app.module";
-import {JwtAccessService} from "../src/jwt-access/jwt-access.service";
 
 describe('/user (e2e)', () => {
     let app: INestApplication;
@@ -30,14 +28,18 @@ describe('/user (e2e)', () => {
         await app.init();
     });
 
-    it.each([
-        [{ email: test_user.email, password: 'shorttt' }, 400],
-        [{ email: 'noemail', password: test_user.password }, 400],
-    ])('POST / Should return 400.', (body, status) => {
+    it('POST / Should return 400 (short password).', () => {
         return request(app.getHttpServer())
             .post('/user')
-            .send(body)
-            .expect(status);
+            .send({ email: test_user.email, password: 'shorttt' })
+            .expect(400);
+    })
+
+    it('POST / Should return 400 (wrong mail).', () => {
+        return request(app.getHttpServer())
+            .post('/user')
+            .send({ email: 'noemail', password: test_user.password })
+            .expect(400);
     })
 
     it('POST / Should return 201 and { email }.', () => {
@@ -70,13 +72,6 @@ describe('/user (e2e)', () => {
             .expect(401);
     });
 
-    it('GET / Should return 200 and { email }.', () => {
-        return request(app.getHttpServer())
-            .get('/user')
-            .set("Authorization", access_token)
-            .expect(200, { email: test_user.email })
-    })
-
     it('PATCH / Should return 401.', () => {
         return request(app.getHttpServer())
             .patch('/user')
@@ -84,7 +79,21 @@ describe('/user (e2e)', () => {
             .expect(401);
     });
 
-    it('PATCH / Should return 400.', () => {
+    it('DELETE / Should return 401.', () => {
+        return request(app.getHttpServer())
+            .delete('/user')
+            .send()
+            .expect(401);
+    });
+
+    it('GET / Should return 200 and { email }.', () => {
+        return request(app.getHttpServer())
+            .get('/user')
+            .set("Authorization", access_token)
+            .expect(200, { email: test_user.email })
+    })
+
+    it('PATCH / Should return 400 (short password).', () => {
         return request(app.getHttpServer())
             .patch('/user')
             .set("Authorization", access_token)
@@ -100,19 +109,35 @@ describe('/user (e2e)', () => {
             .expect(200, { email: test_user.email });
     });
 
-    it('DELETE / Should return 401.', () => {
-        return request(app.getHttpServer())
-            .delete('/user')
-            .send()
-            .expect(401);
-    });
-
     it('DELETE / Should return 200.', () => {
         return request(app.getHttpServer())
             .delete('/user')
             .set("Authorization", access_token)
             .send()
             .expect(200);
+    });
+
+    it('GET / Should return 404.', () => {
+        return request(app.getHttpServer())
+            .get('/user')
+            .set("Authorization", access_token)
+            .expect(404);
+    })
+
+    it('PATCH / Should return 404.', () => {
+        return request(app.getHttpServer())
+            .patch('/user')
+            .set("Authorization", access_token)
+            .send({ password: 'newsuperpass' })
+            .expect(404);
+    });
+
+    it('DELETE / Should return 404.', () => {
+        return request(app.getHttpServer())
+            .delete('/user')
+            .set("Authorization", access_token)
+            .send()
+            .expect(404);
     });
 
     afterAll(async () => {
