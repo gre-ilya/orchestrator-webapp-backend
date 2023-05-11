@@ -11,7 +11,7 @@ export class UserEntity implements User {
   email: string;
 
   @Exclude()
-  passwordHash: string;
+  password: string;
 
   @Exclude()
   isActivated: boolean;
