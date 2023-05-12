@@ -6,15 +6,14 @@ stages:
   - deploy
 
 before_script:
-  - apt-get update
-  - apt-get install -y make
+  - apt-get update && apt-get install -y make
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - cp $DOT_ENV $(pwd)/.env
 
 build:
   stage: build
   script:
-    - make build push
+    - make build-ci-cd push-ci-cd
   tags:
     - job:build
   only:
@@ -25,7 +24,7 @@ build:
 test:
   stage: test
   script:
-    - make pull up-test test
+    - make pull-ci-cd up-test test-ci-cd
   tags:
     - job:test
   only:

@@ -1,4 +1,8 @@
 .PHONY: test
+include .env
+export
+
+IMAGE_NAME=${CI_REGISTRY}/${ORGANIZATION}/${PATH_TO_PROJECT}/${PATH_TO_PROJECT}:${CI_ENVIRONMENT_SLUG}-${CI_COMMIT_SHA}
 
 all: down build up
 
@@ -21,6 +25,18 @@ down-test:
 
 build-test:
 	docker compose --profile test build
+
+build-ci-cd:
+	docker build -t ${IMAGE_NAME}
+
+push-ci-cd:
+	docker push ${IMAGE_NAME}
+
+pull-ci-cd:
+	docker pull ${IMAGE_NAME}
+
+test-ci-cd:
+	docker-compose exec -T app-server npm run test
 
 server:
 	nest start

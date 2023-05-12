@@ -25,7 +25,7 @@ services:
       - './.env'
 
   app-server:
-    build: '.'
+    image: "${IMAGE_NAME}"
     profiles:
       - 'prod'
       - 'test'
