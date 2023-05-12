@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Project } from '@prisma/client';
 import { Exclude } from 'class-transformer';
-import * as process from 'process';
 
 export class ProjectEntity implements Project {
   constructor(partial: Partial<ProjectEntity>) {
@@ -10,7 +9,7 @@ export class ProjectEntity implements Project {
 
   static handleArray(partialArray: Partial<ProjectEntity[]>) {
     const result: ProjectEntity[] = [];
-    partialArray.forEach((val, index) => {
+    partialArray.forEach((val) => {
       result.push(new ProjectEntity(val));
     });
     return result;

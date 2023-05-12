@@ -1,8 +1,8 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateUserDto } from './create-user.dto';
-import {IsEmail, IsNotEmpty, IsString, MinLength} from 'class-validator';
-import {Exclude} from "class-transformer";
-import {UserRole} from "@prisma/client";
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import { UserRole } from '@prisma/client';
 
 export class UpdateUserDto {
   constructor(partial: Partial<UpdateUserDto>) {

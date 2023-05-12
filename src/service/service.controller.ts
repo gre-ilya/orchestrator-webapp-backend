@@ -17,12 +17,10 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
-  ApiProperty,
   ApiTags,
 } from '@nestjs/swagger';
 import { ServiceEntity } from './entities/service.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { isArray } from 'class-validator';
 import { ServicePreviewEntity } from './entities/service-preview.entity';
 
 @Controller('project/:project/service')
