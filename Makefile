@@ -1,8 +1,4 @@
 .PHONY: test
-include .env
-export
-
-IMAGE_NAME=${CI_REGISTRY}/${ORGANIZATION}/${PATH_TO_PROJECT}/${PATH_TO_PROJECT}:${CI_ENVIRONMENT_SLUG}-${CI_COMMIT_SHA}
 
 all: down build up
 

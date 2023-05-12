@@ -1,7 +1,14 @@
 FROM node:18.16-slim
+
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait /wait
+RUN chmod +x /wait
+
 WORKDIR /app-dir
-RUN npm install -D prisma && \
-    apt-get update && \
-    apt-get install -y make && \
-    apt-get install -y htop && \
-    rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json /app-dir/
+
+RUN npm install
+
+COPY . .
+
+

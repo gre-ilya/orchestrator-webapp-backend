@@ -28,13 +28,25 @@ services:
     image: "${IMAGE_NAME}"
     profiles:
       - 'prod'
-      - 'test'
-    depends_on:
-      - 'postgres'
-      - 'postgres-test'
-    volumes:
-      - './:/app-dir'
+#    volumes:
+#      - './:/app-dir'
+#    command: bash -c '/wait && nest start'
     command: bash -c 'tail -f /dev/null'
+    environment:
+      WAIT_HOSTS: "${POSTGRES_HOST}:5432"
+    ports:
+      - '3000:3000'
+
+  app-server-test:
+    image: "${IMAGE_NAME}"
+    profiles:
+      - 'test'
+#    volumes:
+#      - './:/app-dir'
+#    command: bash -c '/wait && npm run test && npm run test:e2e'
+    command: bash -c 'tail -f /dev/null'
+    environment:
+      WAIT_HOSTS: "${POSTGRES_HOST}:5432"
     ports:
       - '3000:3000'
 

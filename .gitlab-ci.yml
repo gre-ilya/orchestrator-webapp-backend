@@ -30,7 +30,7 @@ test:
   script:
     - docker pull $IMAGE_NAME
     - docker-compose --profile test up -d
-    - docker-compose exec -T app-server npm run test
+    - docker-compose exec -T app-server-test "npm run test && npm run test:e2e"
   tags:
     - job:test
   only:
@@ -44,6 +44,7 @@ deploy:
     - docker pull $IMAGE NAME
     - docker-compose --profile prod down
     - docker-compose --profile prod up
+    - docker-compose exec -T app-server "npm start"
   tags:
     - job:deploy
   only:
