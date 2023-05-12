@@ -12,7 +12,7 @@ before_script:
 build:
   stage: build
   script:
-    - docker build -t ${IMAGE_NAME}
+    - docker build -t $IMAGE_NAME
     - docker push $IMAGE_NAME
   tags:
     - job:build
