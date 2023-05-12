@@ -16,7 +16,7 @@ before_script:
 build:
   stage: build
   script:
-    - docker build -t $IMAGE_NAME
+    - docker build -t $IMAGE_NAME .
     - docker push $IMAGE_NAME
   tags:
     - job:build
@@ -28,7 +28,9 @@ build:
 test:
   stage: test
   script:
-    - make pull-ci-cd up-test test-ci-cd
+    - docker pull $IMAGE_NAME
+    - docker-compose --profile test up -d
+    - docker-compose exec -T app-server npm run test
   tags:
     - job:test
   only:
@@ -39,7 +41,9 @@ test:
 deploy:
   stage: deploy
   script:
-    - make pull down up #migrate
+    - docker pull $IMAGE NAME
+    - docker-compose --profile prod down
+    - docker-compose --profile prod up
   tags:
     - job:deploy
   only:
