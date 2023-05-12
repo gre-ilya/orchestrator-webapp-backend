@@ -8,11 +8,12 @@ stages:
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - cp $DOT_ENV $(pwd)/.env
+  - export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 
 build:
   stage: build
   script:
-    - docker build -t $ORGANIZATION
+    - docker build -t $IMAGE_NAME
     - docker push $IMAGE_NAME
   tags:
     - job:build
