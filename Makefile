@@ -3,13 +3,13 @@
 all: down build up
 
 up:
-	docker compose --profile prod up -d
+	docker compose -f docker-compose.local.yml --profile prod up -d
 
 down:
-	docker compose --profile prod down
+	docker compose -f docker-compose.local.yml --profile prod down
 
 build:
-	docker compose --profile prod build
+	docker compose -f docker-compose.local.yml --profile prod build
 
 all-test: down-test build-test up-test
 
@@ -41,7 +41,7 @@ dev:
 	npm start
 
 shell:
-	docker compose exec -it app-server bash
+	docker compose -f docker-compose.local.yml exec -it app-server bash
 
 lint:
 	npm run lint
