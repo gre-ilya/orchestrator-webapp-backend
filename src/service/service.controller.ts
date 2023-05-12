@@ -23,7 +23,7 @@ import { ServiceEntity } from './entities/service.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ServicePreviewEntity } from './entities/service-preview.entity';
 
-@Controller('project/:project/service')
+@Controller('projects/:project/services')
 @ApiTags('services')
 export class ServiceController {
   constructor(private readonly servicesService: ServiceService) {}

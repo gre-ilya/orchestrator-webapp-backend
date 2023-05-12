@@ -53,7 +53,8 @@ test:
 	npm run test
 
 e2e:
-	npm run test:e2e
+	npm run test:e2e -- user
+	npm run test:e2e -- project
 
 watch:
 	npm run test:watch

@@ -1,11 +1,12 @@
 import {
-  Injectable,
+  Injectable, InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtAccessService } from '../jwt-access/jwt-access.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as process from 'process';
 
@@ -28,13 +29,20 @@ export class JwtRefreshService {
   async createRefreshToken(email: string) {
     await this.killSessions(email);
     const jti = await this.jwtService.signAsync({ email: email });
-    await this.prisma.refreshToken.create({
-      data: {
-        jti: jti,
-        deviceId: crypto.randomUUID(),
-        userEmail: email,
-      },
-    });
+    try {
+      await this.prisma.refreshToken.create({
+        data: {
+          jti: jti,
+          deviceId: crypto.randomUUID(),
+          userEmail: email,
+        },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code == 'P2002') {
+        return jti;
+      }
+      throw new InternalServerErrorException();
+    }
     return jti;
   }
 

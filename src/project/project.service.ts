@@ -21,12 +21,16 @@ export class ProjectService {
   }
 
   async findOne(email: string, uuid: string) {
-    return this.prisma.project.findFirst({
+    const res = await this.prisma.project.findFirst({
       where: {
         id: uuid,
         userEmail: email,
       },
     });
+    if (!res) {
+      throw new NotFoundException();
+    }
+    return res;
   }
 
   async update(

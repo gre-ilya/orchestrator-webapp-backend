@@ -28,9 +28,6 @@ services:
     image: "${IMAGE_NAME}"
     profiles:
       - 'prod'
-#    volumes:
-#      - './:/app-dir'
-#    command: bash -c '/wait && nest start'
     command: bash -c 'tail -f /dev/null'
     environment:
       WAIT_HOSTS: "${POSTGRES_HOST}:5432"
@@ -41,9 +38,6 @@ services:
     image: "${IMAGE_NAME}"
     profiles:
       - 'test'
-#    volumes:
-#      - './:/app-dir'
-#    command: bash -c '/wait && npm run test && npm run test:e2e'
     command: bash -c 'tail -f /dev/null'
     environment:
       WAIT_HOSTS: "${POSTGRES_HOST}:5432"

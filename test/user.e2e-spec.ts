@@ -9,13 +9,13 @@ import { Reflector } from '@nestjs/core';
 import { UserService } from '../src/user/user.service';
 import { AppModule } from '../src/app.module';
 
-describe('/user (e2e)', () => {
+describe('user (e2e)', () => {
   let app: INestApplication;
   let userService: UserService;
   let access_token;
 
   const test_user = {
-    email: 'test@mail.ru',
+    email: undefined,
     password: 'superpass',
   };
 
@@ -24,6 +24,17 @@ describe('/user (e2e)', () => {
       imports: [AppModule],
     }).compile();
     userService = moduleFixture.get<UserService>(UserService);
+    let count = 0;
+    while (true) {
+      const test_email = `test${count}@mail.ru`;
+      try {
+        await userService.findOne(test_email);
+      } catch (NotFoundException) {
+        test_user.email = test_email;
+        break;
+      }
+      count++;
+    }
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     app.useGlobalInterceptors(
@@ -32,30 +43,42 @@ describe('/user (e2e)', () => {
     await app.init();
   });
 
-  it('POST / Should return 400 (short password).', () => {
+  it('GET /users Should return 401.', () => {
+    return request(app.getHttpServer()).get('/users').send().expect(401);
+  });
+
+  it('PATCH /users Should return 401.', () => {
+    return request(app.getHttpServer()).patch('/users').send().expect(401);
+  });
+
+  it('DELETE /users Should return 401.', () => {
+    return request(app.getHttpServer()).delete('/users').send().expect(401);
+  });
+
+  it('POST /users Should return 400 (short password).', () => {
     return request(app.getHttpServer())
-      .post('/user')
+      .post('/users')
       .send({ email: test_user.email, password: 'shorttt' })
       .expect(400);
   });
 
-  it('POST / Should return 400 (wrong mail).', () => {
+  it('POST /users Should return 400 (wrong mail).', () => {
     return request(app.getHttpServer())
-      .post('/user')
+      .post('/users')
       .send({ email: 'noemail', password: test_user.password })
       .expect(400);
   });
 
-  it('POST / Should return 201 and { email }.', () => {
+  it('POST /users Should return 201 and { email }.', () => {
     return request(app.getHttpServer())
-      .post('/user')
+      .post('/users')
       .send({ email: test_user.email, password: test_user.password })
       .expect(201, { email: test_user.email });
   });
 
-  it('POST / Should return 409.', () => {
+  it('POST /users Should return 409.', () => {
     return request(app.getHttpServer())
-      .post('/user')
+      .post('/users')
       .send({ email: test_user.email, password: test_user.password })
       .expect(409);
   });
@@ -69,67 +92,69 @@ describe('/user (e2e)', () => {
     access_token = `Bearer ${res.body.accessToken}`;
   });
 
-  it('GET / Should return 401.', () => {
-    return request(app.getHttpServer()).get('/user').send().expect(401);
-  });
-
-  it('PATCH / Should return 401.', () => {
-    return request(app.getHttpServer()).patch('/user').send().expect(401);
-  });
-
-  it('DELETE / Should return 401.', () => {
-    return request(app.getHttpServer()).delete('/user').send().expect(401);
-  });
-
-  it('GET / Should return 200 and { email }.', () => {
+  it('GET /users Should return 200 and { email }.', () => {
     return request(app.getHttpServer())
-      .get('/user')
+      .get('/users')
       .set('Authorization', access_token)
       .expect(200, { email: test_user.email });
   });
 
-  it('PATCH / Should return 400 (short password).', () => {
+  it('PATCH /users Should return 400 (short password).', () => {
     return request(app.getHttpServer())
-      .patch('/user')
+      .patch('/users')
       .set('Authorization', access_token)
       .send({ password: 'short' })
       .expect(400);
   });
 
-  it('PATCH / Should return 200 and { email }.', () => {
+  it('PATCH /users Should return 200 and { email } (password updated).', () => {
     return request(app.getHttpServer())
-      .patch('/user')
+      .patch('/users')
       .set('Authorization', access_token)
       .send({ password: 'newsuperpass' })
       .expect(200, { email: test_user.email });
   });
 
-  it('DELETE / Should return 200.', () => {
+  it('POST /auth/login Should return 401 (auth with old password).', async () => {
+    return  request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: test_user.email, password: test_user.password })
+        .expect(401);
+  });
+
+  it('POST /auth/login Should return 201 (auth with new password).', async () => {
+    return  request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: test_user.email, password: 'newsuperpass' })
+        .expect(201);
+  });
+
+  it('DELETE /users Should return 200.', () => {
     return request(app.getHttpServer())
-      .delete('/user')
+      .delete('/users')
       .set('Authorization', access_token)
       .send()
       .expect(200);
   });
 
-  it('GET / Should return 404.', () => {
+  it('GET /users Should return 404.', () => {
     return request(app.getHttpServer())
-      .get('/user')
+      .get('/users')
       .set('Authorization', access_token)
       .expect(404);
   });
 
-  it('PATCH / Should return 404.', () => {
+  it('PATCH /users Should return 404.', () => {
     return request(app.getHttpServer())
-      .patch('/user')
+      .patch('/users')
       .set('Authorization', access_token)
       .send({ password: 'newsuperpass' })
       .expect(404);
   });
 
-  it('DELETE / Should return 404.', () => {
+  it('DELETE /users Should return 404.', () => {
     return request(app.getHttpServer())
-      .delete('/user')
+      .delete('/users')
       .set('Authorization', access_token)
       .send()
       .expect(404);
