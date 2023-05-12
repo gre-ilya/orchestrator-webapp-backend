@@ -9,8 +9,8 @@ before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - cp $DOT_ENV $(pwd)/.env
   - export $( grep -vE "^(#.*|\s*)$" .env )
-  - echo $CI_REGISTRY
   - IMAGE_NAME=$CI_REGISTRY/$ORGANIZATION/$PATH_TO_PROJECT:$CI_ENVIRONMENT_SLUG-$CI_COMMIT_SHA
+  - echo $IMAGE_NAME
 
 
 build:
