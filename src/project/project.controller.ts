@@ -9,7 +9,6 @@ import {
   UseGuards,
   Request,
   NotFoundException,
-  Req,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -20,7 +19,6 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
-  ApiProperty,
   ApiTags,
 } from '@nestjs/swagger';
 import { ProjectEntity } from './entities/project.entity';

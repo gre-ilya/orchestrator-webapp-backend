@@ -25,16 +25,22 @@ services:
       - './.env'
 
   app-server:
-    build: '.'
+    image: "${IMAGE_NAME}"
     profiles:
       - 'prod'
-      - 'test'
-    depends_on:
-      - 'postgres'
-      - 'postgres-test'
-    volumes:
-      - './:/app-dir'
     command: bash -c 'tail -f /dev/null'
+    environment:
+      WAIT_HOSTS: "${POSTGRES_HOST}:5432"
+    ports:
+      - '3000:3000'
+
+  app-server-test:
+    image: "${IMAGE_NAME}"
+    profiles:
+      - 'test'
+    command: bash -c 'tail -f /dev/null'
+    environment:
+      WAIT_HOSTS: "${POSTGRES_HOST}:5432"
     ports:
       - '3000:3000'
 

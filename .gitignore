@@ -3,3 +3,5 @@
 node_modules/
 dist/
 coverage/
+Dockerfile.local
+docker-compose.local.yml

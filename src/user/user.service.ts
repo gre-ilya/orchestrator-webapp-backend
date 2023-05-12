@@ -3,12 +3,12 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as process from 'process';
 
@@ -23,10 +23,13 @@ export class UserService {
     try {
       return await this.prisma.user.create({ data: createUserDto });
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code == 'P2002') {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code == 'P2002'
+      ) {
         throw new ConflictException();
       }
-      throw new InternalServerErrorException()
+      throw new InternalServerErrorException();
     }
   }
 
@@ -46,9 +49,15 @@ export class UserService {
       );
     }
     try {
-      return await this.prisma.user.update({ where: { email }, data: updateUserDto });
+      return await this.prisma.user.update({
+        where: { email },
+        data: updateUserDto,
+      });
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code == 'P2025') {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code == 'P2025'
+      ) {
         throw new NotFoundException();
       }
       throw new InternalServerErrorException();
@@ -57,9 +66,12 @@ export class UserService {
 
   async remove(email: string) {
     try {
-      await this.prisma.user.delete({where: {email}});
+      await this.prisma.user.delete({ where: { email } });
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code == 'P2025') {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code == 'P2025'
+      ) {
         throw new NotFoundException();
       }
       throw new InternalServerErrorException();

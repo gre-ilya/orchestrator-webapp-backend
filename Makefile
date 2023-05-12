@@ -3,13 +3,13 @@
 all: down build up
 
 up:
-	docker compose --profile prod up -d
+	docker compose -f docker-compose.local.yml --profile prod up -d
 
 down:
-	docker compose --profile prod down
+	docker compose -f docker-compose.local.yml --profile prod down
 
 build:
-	docker compose --profile prod build
+	docker compose -f docker-compose.local.yml --profile prod build
 
 all-test: down-test build-test up-test
 
@@ -22,6 +22,18 @@ down-test:
 build-test:
 	docker compose --profile test build
 
+build-ci-cd:
+	docker build -t ${IMAGE_NAME}
+
+push-ci-cd:
+	docker push ${IMAGE_NAME}
+
+pull-ci-cd:
+	docker pull ${IMAGE_NAME}
+
+test-ci-cd:
+	docker-compose exec -T app-server npm run test
+
 server:
 	nest start
 
@@ -29,7 +41,7 @@ dev:
 	npm start
 
 shell:
-	docker compose exec -it app-server bash
+	docker compose -f docker-compose.local.yml exec -it app-server bash
 
 lint:
 	npm run lint
@@ -41,7 +53,8 @@ test:
 	npm run test
 
 e2e:
-	npm run test:e2e
+	npm run test:e2e -- user
+	npm run test:e2e -- project
 
 watch:
 	npm run test:watch

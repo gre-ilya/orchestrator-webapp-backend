@@ -1,5 +1,3 @@
-import { RefreshToken } from '@prisma/client';
-import { UserEntity } from '../../user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 

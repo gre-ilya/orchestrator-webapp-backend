@@ -1,5 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Post } from '@nestjs/common';
 import { exec, spawn } from 'child_process';
 import * as process from 'process';
 

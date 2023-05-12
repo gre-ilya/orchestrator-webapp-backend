@@ -8,7 +8,7 @@ import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtRefreshModule } from '../jwt-refresh/jwt-refresh.module';
 import { JwtAccessModule } from '../jwt-access/jwt-access.module';
-import {PrismaModule} from "../prisma/prisma.module";
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
