@@ -55,6 +55,7 @@ test:
 e2e:
 	npm run test:e2e -- user
 	npm run test:e2e -- project
+	npm run test:e2e -- service
 
 watch:
 	npm run test:watch
