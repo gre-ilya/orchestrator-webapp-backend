@@ -41,7 +41,7 @@ describe('project (e2e)', () => {
         testUserB = await testingMethods.createNotExistingUser(userService, 'superpass');
 
         projectService = moduleFixture.get<ProjectService>(ProjectService);
-        userBProject = new ProjectEntity(await projectService.create(testUserB.email, new CreateProjectDto('project' )));
+        userBProject = new ProjectEntity(await projectService.create(testUserB.email, new CreateProjectDto({ name: 'project' })));
 
         app = moduleFixture.createNestApplication();
         app.useGlobalPipes(new ValidationPipe({whitelist: true}));
@@ -59,16 +59,17 @@ describe('project (e2e)', () => {
         return request(app.getHttpServer()).get('/projects').send().expect(401);
     });
 
+    const projectRandomUuid = crypto.randomUUID();
     it('GET /projects/{project-random-uuid} Should return 401.', () => {
-        return request(app.getHttpServer()).get(`/projects/${crypto.randomUUID()}`).send().expect(401);
+        return request(app.getHttpServer()).get(`/projects/${projectRandomUuid}`).send().expect(401);
     });
 
-    it('PATCH /projects Should return 401.', () => {
-        return request(app.getHttpServer()).get('/projects').send().expect(401);
+    it('PATCH /projects/{project-random-uuid} Should return 401.', () => {
+        return request(app.getHttpServer()).get(`/projects/${projectRandomUuid}`).send().expect(401);
     });
 
-    it('DELETE /projects Should return 401.', () => {
-        return request(app.getHttpServer()).get('/projects').send().expect(401);
+    it('DELETE /projects/{project-random-uuid} Should return 401.', () => {
+        return request(app.getHttpServer()).get(`/projects/${projectRandomUuid}`).send().expect(401);
     });
 
     it('POST /auth/login Should return 201 and { accessToken, refresh_token }', async () => {

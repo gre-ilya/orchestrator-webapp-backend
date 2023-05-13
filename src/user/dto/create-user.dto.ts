@@ -8,9 +8,8 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
-  constructor(email: string, password: string) {
-    this.email = email;
-    this.password = password;
+  constructor(partial: Partial<CreateUserDto>) {
+    Object.assign(this, partial);
   }
 
   @IsEmail()
