@@ -8,33 +8,25 @@ import * as request from 'supertest';
 import { Reflector } from '@nestjs/core';
 import { UserService } from '../src/user/user.service';
 import { AppModule } from '../src/app.module';
+import * as testingMethods from './testing-methods';
+import {UserEntity} from "../src/user/entities/user.entity";
+import * as process from "process";
 
 describe('user (e2e)', () => {
   let app: INestApplication;
   let userService: UserService;
-  let access_token;
+  let accessToken: string;
 
-  const test_user = {
-    email: undefined,
-    password: 'superpass',
-  };
+  let testUser: UserEntity;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
     userService = moduleFixture.get<UserService>(UserService);
-    let count = 0;
-    while (true) {
-      const test_email = `test${count}@mail.ru`;
-      try {
-        await userService.findOne(test_email);
-      } catch (NotFoundException) {
-        test_user.email = test_email;
-        break;
-      }
-      count++;
-    }
+    testUser = await testingMethods.findNotExistingUser(userService);
+    testUser.password = 'superpass';
+
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     app.useGlobalInterceptors(
@@ -58,51 +50,51 @@ describe('user (e2e)', () => {
   it('POST /users Should return 400 (short password).', () => {
     return request(app.getHttpServer())
       .post('/users')
-      .send({ email: test_user.email, password: 'shorttt' })
+      .send({ email: testUser.email, password: 'shorttt' })
       .expect(400);
   });
 
   it('POST /users Should return 400 (wrong mail).', () => {
     return request(app.getHttpServer())
       .post('/users')
-      .send({ email: 'noemail', password: test_user.password })
+      .send({ email: 'noemail', password: testUser.password })
       .expect(400);
   });
 
   it('POST /users Should return 201 and { email }.', () => {
     return request(app.getHttpServer())
       .post('/users')
-      .send({ email: test_user.email, password: test_user.password })
-      .expect(201, { email: test_user.email });
+      .send({ email: testUser.email, password: testUser.password })
+      .expect(201, { email: testUser.email });
   });
 
   it('POST /users Should return 409.', () => {
     return request(app.getHttpServer())
       .post('/users')
-      .send({ email: test_user.email, password: test_user.password })
+      .send({ email: testUser.email, password: testUser.password })
       .expect(409);
   });
 
-  it('POST /auth/login Should return 201 and { access_token, refresh_token }', async () => {
+  it('POST /auth/login Should return 201 and { accessToken, refresh_token }', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: test_user.email, password: test_user.password })
+      .send({ email: testUser.email, password: testUser.password })
       .expect(201);
 
-    access_token = `Bearer ${res.body.accessToken}`;
+    accessToken = `Bearer ${res.body.accessToken}`;
   });
 
   it('GET /users Should return 200 and { email }.', () => {
     return request(app.getHttpServer())
       .get('/users')
-      .set('Authorization', access_token)
-      .expect(200, { email: test_user.email });
+      .set('Authorization', accessToken)
+      .expect(200, { email: testUser.email });
   });
 
   it('PATCH /users Should return 400 (short password).', () => {
     return request(app.getHttpServer())
       .patch('/users')
-      .set('Authorization', access_token)
+      .set('Authorization', accessToken)
       .send({ password: 'short' })
       .expect(400);
   });
@@ -110,29 +102,29 @@ describe('user (e2e)', () => {
   it('PATCH /users Should return 200 and { email } (password updated).', () => {
     return request(app.getHttpServer())
       .patch('/users')
-      .set('Authorization', access_token)
+      .set('Authorization', accessToken)
       .send({ password: 'newsuperpass' })
-      .expect(200, { email: test_user.email });
+      .expect(200, { email: testUser.email });
   });
 
   it('POST /auth/login Should return 401 (auth with old password).', async () => {
     return  request(app.getHttpServer())
         .post('/auth/login')
-        .send({ email: test_user.email, password: test_user.password })
+        .send({ email: testUser.email, password: testUser.password })
         .expect(401);
   });
 
   it('POST /auth/login Should return 201 (auth with new password).', async () => {
     return  request(app.getHttpServer())
         .post('/auth/login')
-        .send({ email: test_user.email, password: 'newsuperpass' })
+        .send({ email: testUser.email, password: 'newsuperpass' })
         .expect(201);
   });
 
   it('DELETE /users Should return 200.', () => {
     return request(app.getHttpServer())
       .delete('/users')
-      .set('Authorization', access_token)
+      .set('Authorization', accessToken)
       .send()
       .expect(200);
   });
@@ -140,14 +132,14 @@ describe('user (e2e)', () => {
   it('GET /users Should return 404.', () => {
     return request(app.getHttpServer())
       .get('/users')
-      .set('Authorization', access_token)
+      .set('Authorization', accessToken)
       .expect(404);
   });
 
   it('PATCH /users Should return 404.', () => {
     return request(app.getHttpServer())
       .patch('/users')
-      .set('Authorization', access_token)
+      .set('Authorization', accessToken)
       .send({ password: 'newsuperpass' })
       .expect(404);
   });
@@ -155,14 +147,14 @@ describe('user (e2e)', () => {
   it('DELETE /users Should return 404.', () => {
     return request(app.getHttpServer())
       .delete('/users')
-      .set('Authorization', access_token)
+      .set('Authorization', accessToken)
       .send()
       .expect(404);
   });
 
   afterAll(async () => {
     try {
-      await userService.remove(test_user.email);
+      await userService.remove(testUser.email);
     } catch (err) {}
     await app.close();
   });
