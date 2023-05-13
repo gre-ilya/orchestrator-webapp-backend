@@ -138,14 +138,7 @@ describe('project (e2e)', () => {
   });
 
   it('GET /projects/{project-not-existing-uuid} Should return 404.', async () => {
-    while (true) {
-      notExistingProjectUuid = crypto.randomUUID();
-      try {
-        await projectService.findOne(userA.email, notExistingProjectUuid);
-      } catch (NotFoundException) {
-        break;
-      }
-    }
+    const notExistingProjectUuid = await testingMethods.generateNotExistingProjectUuid(projectService, userA.email)
     request(app.getHttpServer())
       .get(`/projects/${notExistingProjectUuid}`)
       .set('Authorization', accessToken)

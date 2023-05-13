@@ -16,6 +16,7 @@ import { ProjectEntity } from '../src/project/entities/project.entity';
 import { UserEntity } from '../src/user/entities/user.entity';
 import { ServiceEntity } from '../src/service/entities/service.entity';
 import { ServiceService } from '../src/service/service.service';
+import * as process from "process";
 
 describe('service (e2e)', () => {
   let app: INestApplication;
@@ -25,6 +26,21 @@ describe('service (e2e)', () => {
   let accessToken: string;
   let notExistingServiceUuid: string;
   let userBServiceUuid: string;
+  let serviceRequestDTO = {
+      name: 'service',
+      repository: 'https://github.com/user/project'
+  };
+  let serviceResponseDTO = {
+      id: null,
+      name: serviceRequestDTO.name,
+      repository: serviceRequestDTO.repository,
+      buildCommand: null,
+      deployCommand: null,
+      ip: null,
+      port: null,
+      status: 'Disabled',
+      variables: null,
+    }
   let userA: UserEntity, userB: UserEntity;
   let userAProject: ProjectEntity, userBProject: ProjectEntity;
   let userBService: ServiceEntity;
@@ -71,11 +87,11 @@ describe('service (e2e)', () => {
   it('POST /projects/{project-existing-uuid}/services Should return 401.', () => {
     return request(app.getHttpServer())
       .post(`/projects/${userAProject.id}/services`)
-      .send()
+      .send(serviceRequestDTO)
       .expect(401);
   });
 
-  it('GET /projects/project-existing-uuid/services Should return 401.', () => {
+  it('GET /projects/{project-existing-uuid}/services Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${userAProject.id}/services`)
       .send()
@@ -111,6 +127,72 @@ describe('service (e2e)', () => {
       .expect(201);
     accessToken = `Bearer ${res.body.accessToken}`;
   });
+
+    it('GET /projects/{project-existing-uuid}/services Should return 200 and zero services.', async () => {
+        const req = await request(app.getHttpServer())
+            .get(`/projects/${userAProject.id}/services`)
+            .set('Authorization', accessToken);
+        expect(req.statusCode).toBe(200);
+        expect(req.body.length).toBe(0);
+    });
+
+    it('GET /projects/{project-other-user-uuid}/services Should return 404.', async () => {
+        return request(app.getHttpServer())
+            .get(`/projects/${userBProject.id}/services`)
+            .set('Authorization', accessToken)
+            .expect(404);
+    });
+
+    it('GET /projects/{project-existing-uuid}/services/{service-not-existing-uuid} Should return 404.', async () => {
+        return request(app.getHttpServer())
+            .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
+            .set('Authorization', accessToken)
+            .expect(404)
+    });
+
+    it('GET /projects/{project-other-user-uuid}/services/{service-other-user-uuid} Should return 404.', async () => {
+        return request(app.getHttpServer())
+            .get(`/projects/${userBProject.id}/services/${userBServiceUuid}`)
+            .set('Authorization', accessToken)
+            .expect(404)
+    });
+
+    it.each([
+        [serviceRequestDTO, 201],
+        [serviceRequestDTO, 201]
+    ]) ('POST /projects/{project-existing-uuid}/services Should return 201.', async (res, responseStatusCode) => {
+        const req = await request(app.getHttpServer())
+            .post(`/projects/${userAProject.id}/services`)
+            .send(res)
+            .set('Authorization', accessToken)
+        expect(req.statusCode).toBe(responseStatusCode);
+        expect(uuidValidate(req.body.id)).toBeTruthy();
+        req.body.id = null
+        expect(req.body).toStrictEqual(serviceResponseDTO)
+    });
+
+    it('POST /projects/{other-user-project-uuid}/services Should return 404.', () => {
+        return request(app.getHttpServer())
+            .post(`/projects/${userBProject.id}/services`)
+            .send(serviceRequestDTO)
+            .set('Authorization', accessToken)
+            .expect(404);
+    });
+
+    it('GET /projects/project-existing-uuid/services Should return 200 and 2 services.', async () => {
+        const req = await request(app.getHttpServer())
+            .get(`/projects/${userAProject.id}/services`)
+            .set('Authorization', accessToken);
+        expect(req.statusCode).toBe(200);
+        expect(req.body.length).toBe(2);
+        expect(uuidValidate(req.body[0].id)).toBeTruthy();
+        req.body[0].id = null
+        expect(req.body[0]).toStrictEqual({
+            id: null,
+            name: serviceRequestDTO.name,
+            status: 'Disabled'
+        });
+    });
 
   afterAll(async () => {
     try {

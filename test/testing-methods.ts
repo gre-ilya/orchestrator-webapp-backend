@@ -7,8 +7,9 @@ import { ProjectEntity } from '../src/project/entities/project.entity';
 import { ServiceService } from '../src/service/service.service';
 import { CreateServiceDto } from '../src/service/dto/create-service.dto';
 import { ServiceEntity } from '../src/service/entities/service.entity';
+import * as crypto from 'crypto';
 
-export async function findNotExistingUser(userService: UserService) {
+export async function generateNotExistingUser(userService: UserService) {
   let count = 0;
   const testUser = {
     email: undefined,
@@ -26,7 +27,7 @@ export async function findNotExistingUser(userService: UserService) {
 }
 
 export async function createNotExistingUser(userService: UserService) {
-  const user = await findNotExistingUser(userService);
+  const user = await generateNotExistingUser(userService);
   user.password = 'superpass';
   await userService.create(
     new CreateUserDto({ email: user.email, password: user.password }),
@@ -60,4 +61,15 @@ export async function createService(
     }),
   );
   return new ServiceEntity(service);
+}
+
+export async function generateNotExistingProjectUuid(projectService: ProjectService, email: string) {
+  while (true) {
+    const notExistingProjectUuid = crypto.randomUUID();
+    try {
+      await projectService.findOne(email, notExistingProjectUuid);
+    } catch (NotFoundException) {
+      return notExistingProjectUuid;
+    }
+  }
 }

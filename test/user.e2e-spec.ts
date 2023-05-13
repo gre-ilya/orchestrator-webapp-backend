@@ -10,7 +10,6 @@ import { UserService } from '../src/user/user.service';
 import { AppModule } from '../src/app.module';
 import * as testingMethods from './testing-methods';
 import { UserEntity } from '../src/user/entities/user.entity';
-import * as process from 'process';
 
 describe('user (e2e)', () => {
   let app: INestApplication;
@@ -24,7 +23,7 @@ describe('user (e2e)', () => {
       imports: [AppModule],
     }).compile();
     userService = moduleFixture.get<UserService>(UserService);
-    user = await testingMethods.findNotExistingUser(userService);
+    user = await testingMethods.generateNotExistingUser(userService);
     user.password = 'superpass';
 
     app = moduleFixture.createNestApplication();

@@ -3,6 +3,7 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectService } from '../project/project.service';
+import * as process from "process";
 
 @Injectable()
 export class ServiceService {
@@ -45,6 +46,7 @@ export class ServiceService {
     if (!result) {
       throw new NotFoundException();
     }
+    console.log(process.env.DELIMITER, result);
     return result;
   }
 

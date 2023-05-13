@@ -23,6 +23,9 @@ export class ServicePreviewEntity implements Service {
   @ApiProperty()
   name: string;
 
+  @ApiProperty()
+  status: DeploymentStatus;
+
   @Exclude()
   repository: string;
 
@@ -40,9 +43,6 @@ export class ServicePreviewEntity implements Service {
 
   @Exclude()
   port: number;
-
-  @ApiProperty()
-  status: DeploymentStatus;
 
   @Exclude()
   variables: JsonObject;
