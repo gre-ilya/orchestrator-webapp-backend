@@ -46,7 +46,6 @@ export class ServiceService {
     if (!result) {
       throw new NotFoundException();
     }
-    console.log(process.env.DELIMITER, result);
     return result;
   }
 

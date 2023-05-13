@@ -16,6 +16,7 @@ import { ProjectEntity } from '../src/project/entities/project.entity';
 import { UserEntity } from '../src/user/entities/user.entity';
 import { ServiceEntity } from '../src/service/entities/service.entity';
 import { ServiceService } from '../src/service/service.service';
+import {CreateServiceDto} from "../src/service/dto/create-service.dto";
 import * as process from "process";
 
 describe('service (e2e)', () => {
@@ -42,6 +43,9 @@ describe('service (e2e)', () => {
     }
   let userA: UserEntity, userB: UserEntity;
   let userAProject: ProjectEntity, userBProject: ProjectEntity;
+  let userAService = {
+      id: null
+  }
   let userBService: ServiceEntity;
 
   const testProject = {
@@ -83,14 +87,14 @@ describe('service (e2e)', () => {
     await app.init();
   });
 
-  it('POST /projects/{project-existing-uuid}/services Should return 401.', () => {
+  it('POST /projects/{project}/services Should return 401.', () => {
     return request(app.getHttpServer())
       .post(`/projects/${userAProject.id}/services`)
       .send(serviceRequestDTO)
       .expect(401);
   });
 
-  it('GET /projects/{project-existing-uuid}/services Should return 401.', () => {
+  it('GET /projects/{project}/services Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${userAProject.id}/services`)
       .send()
@@ -98,21 +102,21 @@ describe('service (e2e)', () => {
   });
 
   const serviceRandomUuid = crypto.randomUUID();
-  it('GET /projects/{project-existing-uuid}/services/{service-random-uuid} Should return 401.', () => {
+  it('GET /projects/{project}/services/{service} Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
       .send()
       .expect(401);
   });
 
-  it('PATCH /projects/{project-existing-uuid}/services/{service-random-uuid} Should return 401.', () => {
+  it('PATCH /projects/{project}/services/{service} Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
       .send()
       .expect(401);
   });
 
-  it('DELETE /projects/{project-existing-uuid}/services/{service-random-uuid} Should return 401.', () => {
+  it('DELETE /projects/{project}/services/{service} Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
       .send()
@@ -127,7 +131,7 @@ describe('service (e2e)', () => {
     accessToken = `Bearer ${res.body.accessToken}`;
   });
 
-    it('GET /projects/{project-existing-uuid}/services Should return 200 and zero services.', async () => {
+    it('GET /projects/{project}/services Should return 200 and zero services.', async () => {
         const req = await request(app.getHttpServer())
             .get(`/projects/${userAProject.id}/services`)
             .set('Authorization', accessToken);
@@ -135,21 +139,21 @@ describe('service (e2e)', () => {
         expect(req.body.length).toBe(0);
     });
 
-    it('GET /projects/{project-other-user-uuid}/services Should return 404.', async () => {
+    it('GET /projects/{other-user-project}/services Should return 404.', async () => {
         return request(app.getHttpServer())
             .get(`/projects/${userBProject.id}/services`)
             .set('Authorization', accessToken)
             .expect(404);
     });
 
-    it('GET /projects/{project-existing-uuid}/services/{service-not-existing-uuid} Should return 404.', async () => {
+    it('GET /projects/{project}/services/{not-existing-service} Should return 404.', async () => {
         return request(app.getHttpServer())
             .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
             .set('Authorization', accessToken)
             .expect(404)
     });
 
-    it('GET /projects/{project-other-user-uuid}/services/{service-other-user-uuid} Should return 404.', async () => {
+    it('GET /projects/{other-user-project}/services/{other-user-service} Should return 404.', async () => {
         return request(app.getHttpServer())
             .get(`/projects/${userBProject.id}/services/${userBServiceUuid}`)
             .set('Authorization', accessToken)
@@ -159,7 +163,7 @@ describe('service (e2e)', () => {
     it.each([
         [serviceRequestDTO, 201],
         [serviceRequestDTO, 201]
-    ]) ('POST /projects/{project-existing-uuid}/services Should return 201.', async (res, responseStatusCode) => {
+    ]) ('POST /projects/{project}/services Should return 201.', async (res, responseStatusCode) => {
         const req = await request(app.getHttpServer())
             .post(`/projects/${userAProject.id}/services`)
             .send(res)
@@ -170,7 +174,7 @@ describe('service (e2e)', () => {
         expect(req.body).toStrictEqual(serviceResponseDTO)
     });
 
-    it('POST /projects/{other-user-project-uuid}/services Should return 404.', () => {
+    it('POST /projects/{other-user-project}/services Should return 404.', () => {
         return request(app.getHttpServer())
             .post(`/projects/${userBProject.id}/services`)
             .send(serviceRequestDTO)
@@ -178,19 +182,30 @@ describe('service (e2e)', () => {
             .expect(404);
     });
 
-    it('GET /projects/project-existing-uuid/services Should return 200 and 2 services.', async () => {
+    it('GET /projects/{project}/services Should return 200 and 2 services.', async () => {
         const req = await request(app.getHttpServer())
             .get(`/projects/${userAProject.id}/services`)
             .set('Authorization', accessToken);
         expect(req.statusCode).toBe(200);
         expect(req.body.length).toBe(2);
         expect(uuidValidate(req.body[0].id)).toBeTruthy();
+        userAService.id = req.body[0].id;
         req.body[0].id = null
         expect(req.body[0]).toStrictEqual({
             id: null,
             name: serviceRequestDTO.name,
             status: 'Disabled'
         });
+    });
+
+    it('GET /projects/{project}/services/{service} Should return 200 and service body.', async () => {
+        const req = await request(app.getHttpServer())
+            .get(`/projects/${userAProject.id}/services/${userAService.id}`)
+            .set('Authorization', accessToken);
+        expect(req.statusCode).toBe(200);
+        expect(uuidValidate(req.body.id)).toBeTruthy();
+        req.body.id = null;
+        expect(req.body).toStrictEqual(serviceResponseDTO);
     });
 
   afterAll(async () => {

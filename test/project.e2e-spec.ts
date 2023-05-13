@@ -58,21 +58,21 @@ describe('project (e2e)', () => {
   });
 
   const projectRandomUuid = crypto.randomUUID();
-  it('GET /projects/{project-random-uuid} Should return 401.', () => {
+  it('GET /projects/{project} Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${projectRandomUuid}`)
       .send()
       .expect(401);
   });
 
-  it('PATCH /projects/{project-random-uuid} Should return 401.', () => {
+  it('PATCH /projects/{project} Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${projectRandomUuid}`)
       .send()
       .expect(401);
   });
 
-  it('DELETE /projects/{project-random-uuid} Should return 401.', () => {
+  it('DELETE /projects/{project} Should return 401.', () => {
     return request(app.getHttpServer())
       .get(`/projects/${projectRandomUuid}`)
       .send()
@@ -130,7 +130,7 @@ describe('project (e2e)', () => {
       .expect(400);
   });
 
-  it('GET /projects/{project-not-existing-uuid} Should return 404.', async () => {
+  it('GET /projects/{not-existing-project} Should return 404.', async () => {
     const notExistingProjectUuid = await testingMethods.generateNotExistingProjectUuid(projectService, userA.email)
     request(app.getHttpServer())
       .get(`/projects/${notExistingProjectUuid}`)
@@ -138,7 +138,7 @@ describe('project (e2e)', () => {
       .expect(404);
   });
 
-  it('GET /projects/{project-existing-uuid} Should return 200 and { id, name }.', async () => {
+  it('GET /projects/{project} Should return 200 and { id, name }.', async () => {
     const res = await request(app.getHttpServer())
       .get(`/projects/${userAProject.id}`)
       .set('Authorization', accessToken);
@@ -147,7 +147,7 @@ describe('project (e2e)', () => {
     expect(res.statusCode).toBe(200);
   });
 
-  it('GET /projects/{other-user-project-existing-uuid} Should return 404.', async () => {
+  it('GET /projects/{other-user-project} Should return 404.', async () => {
     request(app.getHttpServer())
       .get(`/projects/${userBProject.id}`)
       .set('Authorization', accessToken)
@@ -162,7 +162,7 @@ describe('project (e2e)', () => {
       .expect(400);
   });
 
-  it('PATCH /projects/{project-not-existing-uuid} Should return 404.', async () => {
+  it('PATCH /projects/{not-existing-project} Should return 404.', async () => {
     request(app.getHttpServer())
       .patch(`/projects/${notExistingProjectUuid}`)
       .set('Authorization', accessToken)
@@ -170,7 +170,7 @@ describe('project (e2e)', () => {
       .expect(404);
   });
 
-  it('PATCH /projects/{project-existing-uuid} Should return 200 and { name }.', async () => {
+  it('PATCH /projects/{project} Should return 200 and { name }.', async () => {
     request(app.getHttpServer())
       .patch(`/projects/${userAProject.id}`)
       .set('Authorization', accessToken)
@@ -178,7 +178,7 @@ describe('project (e2e)', () => {
       .expect(200, { name: 'newname' });
   });
 
-  it('PATCH /projects/{other-user-project-existing-uuid} Should return 404.', async () => {
+  it('PATCH /projects/{other-user-project} Should return 404.', async () => {
     request(app.getHttpServer())
       .patch(`/projects/${userBProject.id}`)
       .set('Authorization', accessToken)
@@ -193,21 +193,21 @@ describe('project (e2e)', () => {
       .expect(400);
   });
 
-  it('DELETE /projects/{project-not-existing-uuid} Should return 404.', async () => {
+  it('DELETE /projects/{not-existing-project} Should return 404.', async () => {
     request(app.getHttpServer())
       .delete(`/projects/${notExistingProjectUuid}`)
       .set('Authorization', accessToken)
       .expect(404);
   });
 
-  it('DELETE /projects/{project-existing-uuid} Should return 200.', async () => {
+  it('DELETE /projects/{project} Should return 200.', async () => {
     request(app.getHttpServer())
       .delete(`/projects/${userAProject.id}`)
       .set('Authorization', accessToken)
       .expect(200);
   });
 
-  it('DELETE /projects/{other-user-project-existing-uuid} Should return 404.', async () => {
+  it('DELETE /projects/{other-user-project} Should return 404.', async () => {
     request(app.getHttpServer())
       .delete(`/projects/${userBProject.id}`)
       .set('Authorization', accessToken)
