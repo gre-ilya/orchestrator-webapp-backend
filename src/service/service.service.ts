@@ -30,7 +30,7 @@ export class ServiceService {
         userEmail: email,
       },
     });
-    if (!project) {
+    if (!project.length) {
       throw new NotFoundException();
     }
     return this.prisma.service.findMany({ where: { projectId: projectId } });

@@ -22,14 +22,12 @@ describe('project (e2e)', () => {
   let projectService: ProjectService;
   let accessToken: string;
   let notExistingProjectUuid: string;
-  let userBProjectUuid: string;
   let userA: UserEntity, userB: UserEntity;
-  let userBProject;
-
-  const testProject = {
+  let userAProject = {
     id: undefined,
     name: 'project',
-  };
+  }
+  let userBProject: ProjectEntity;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -41,12 +39,7 @@ describe('project (e2e)', () => {
     userB = await testingMethods.createNotExistingUser(userService);
 
     projectService = moduleFixture.get<ProjectService>(ProjectService);
-    userBProject = new ProjectEntity(
-      await projectService.create(
-        userB.email,
-        new CreateProjectDto({ name: 'project' }),
-      ),
-    );
+    userBProject = await testingMethods.createProject(projectService, userB.email);
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -103,8 +96,8 @@ describe('project (e2e)', () => {
   });
 
   it.each([
-    [{ name: testProject.name }, 201],
-    [{ name: testProject.name }, 201],
+    [{ name: userAProject.name }, 201],
+    [{ name: userAProject.name }, 201],
   ])(
     'POST /projects Should return 201 and { id, name }.',
     async (req, responseStatusCode) => {
@@ -114,9 +107,9 @@ describe('project (e2e)', () => {
         .send(req);
 
       expect(res.statusCode).toBe(responseStatusCode);
-      expect(res.body.name).toBe(testProject.name);
+      expect(res.body.name).toBe(userAProject.name);
       expect(uuidValidate(res.body.id)).toBeTruthy();
-      testProject.id = res.body.id;
+      userAProject.id = res.body.id;
     },
   );
 
@@ -126,7 +119,7 @@ describe('project (e2e)', () => {
       .set('Authorization', accessToken);
     expect(req.statusCode).toBe(200);
     expect(req.body.length).toBe(2);
-    expect(req.body[0].name).toBe(testProject.name);
+    expect(req.body[0].name).toBe(userAProject.name);
     expect(uuidValidate(req.body[0].id)).toBeTruthy();
   });
 
@@ -147,10 +140,10 @@ describe('project (e2e)', () => {
 
   it('GET /projects/{project-existing-uuid} Should return 200 and { id, name }.', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/projects/${testProject.id}`)
+      .get(`/projects/${userAProject.id}`)
       .set('Authorization', accessToken);
     expect(uuidValidate(res.body.id)).toBeTruthy();
-    expect(res.body.name).toBe(testProject.name);
+    expect(res.body.name).toBe(userAProject.name);
     expect(res.statusCode).toBe(200);
   });
 
@@ -179,7 +172,7 @@ describe('project (e2e)', () => {
 
   it('PATCH /projects/{project-existing-uuid} Should return 200 and { name }.', async () => {
     request(app.getHttpServer())
-      .patch(`/projects/${testProject.id}`)
+      .patch(`/projects/${userAProject.id}`)
       .set('Authorization', accessToken)
       .send({ name: 'newname' })
       .expect(200, { name: 'newname' });
@@ -209,7 +202,7 @@ describe('project (e2e)', () => {
 
   it('DELETE /projects/{project-existing-uuid} Should return 200.', async () => {
     request(app.getHttpServer())
-      .delete(`/projects/${testProject.id}`)
+      .delete(`/projects/${userAProject.id}`)
       .set('Authorization', accessToken)
       .expect(200);
   });

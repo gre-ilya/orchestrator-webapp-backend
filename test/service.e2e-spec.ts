@@ -24,7 +24,6 @@ describe('service (e2e)', () => {
   let projectService: ProjectService;
   let serviceService: ServiceService;
   let accessToken: string;
-  let notExistingServiceUuid: string;
   let userBServiceUuid: string;
   let serviceRequestDTO = {
       name: 'service',
