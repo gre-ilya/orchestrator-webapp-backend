@@ -33,12 +33,16 @@ export async function createNotExistingUser(userService: UserService, password: 
     return new UserEntity(user);
 }
 
-export async function createProject(projectService: ProjectService, userEmail: string, name: string) {
-    const project = await projectService.create(userEmail, new CreateProjectDto({ name: name }));
+export async function createProject(projectService: ProjectService, userEmail: string) {
+    const project = await projectService.create(userEmail, new CreateProjectDto({ name: 'name' }));
     return new ProjectEntity(project);
 }
 
-export async function createService(serviceService: ServiceService, email: string, projectId: string, name: string) {
-    const service = await serviceService.create(email, projectId, new CreateServiceDto({ name: name }));
+export async function createService(serviceService: ServiceService, email: string, projectId: string) {
+    const service = await serviceService.create(email, projectId, new CreateServiceDto({
+        name: 'name',
+        repository: 'https://github.com/user/repo',
+        projectId: projectId,
+    }));
     return new ServiceEntity(service);
 }

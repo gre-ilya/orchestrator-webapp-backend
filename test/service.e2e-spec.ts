@@ -43,14 +43,14 @@ describe('service (e2e)', () => {
         userB = await testingMethods.createNotExistingUser(userService, 'superpass');
 
         projectService = moduleFixture.get<ProjectService>(ProjectService);
-        userAProject = await testingMethods.createProject(projectService, userA.email, 'project');
-        userBProject = await testingMethods.createProject(projectService, userB.email, 'project');
+        userAProject = await testingMethods.createProject(projectService, userA.email);
+        userBProject = await testingMethods.createProject(projectService, userB.email);
 
         serviceService = moduleFixture.get<ServiceService>(ServiceService);
-        userBService = await testingMethods.createService(serviceService, userB.email, userBProject.id, 'service');
+        userBService = await testingMethods.createService(serviceService, userB.email, userBProject.id);
 
         app = moduleFixture.createNestApplication();
-        app.useGlobalPipes(new ValidationPipe({whitelist: true}));
+        app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
         app.useGlobalInterceptors(
             new ClassSerializerInterceptor(app.get(Reflector)),
         );
