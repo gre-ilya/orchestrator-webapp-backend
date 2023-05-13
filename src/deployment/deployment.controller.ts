@@ -38,19 +38,19 @@ export class DeploymentController {
     @Param() params,
     @Body() createDeploymentDto: CreateDeploymentDto,
   ) {
-    return this.deploymentService.create(createDeploymentDto);
+    return this.deploymentService.create(req.user.email, params.project, params.service);
   }
 
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ type: [DeploymentEntity] })
-  @ApiParam({ name: 'service', required: true })
-  @ApiParam({ name: 'project', required: true })
-  findAll(@Request() req, @Param() params) {
-    return this.deploymentService.findAll();
-  }
-
+  // @Get()
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOkResponse({ type: [DeploymentEntity] })
+  // @ApiParam({ name: 'service', required: true })
+  // @ApiParam({ name: 'project', required: true })
+  // findAll(@Request() req, @Param() params) {
+  //   return this.deploymentService.findAll();
+  // }
+  //
   // @Get(':deployment')
   // @UseGuards(JwtAuthGuard)
   // @ApiBearerAuth()
@@ -65,7 +65,7 @@ export class DeploymentController {
   // @Patch(':deployment')
   // @UseGuards(JwtAuthGuard)
   // @ApiBearerAuth()
-  // @ApiOkResponse({ type: DeploymentEntity })
+  // @ApiOkResponse()
   // @ApiParam({ name: 'deployment', required: true })
   // @ApiParam({ name: 'service', required: true })
   // @ApiParam({ name: 'project', required: true })
@@ -76,7 +76,7 @@ export class DeploymentController {
   // @Delete(':deployment')
   // @UseGuards(JwtAuthGuard)
   // @ApiBearerAuth()
-  // @ApiOkResponse({ type: DeploymentEntity })
+  // @ApiOkResponse()
   // @ApiParam({ name: 'deployment', required: true })
   // @ApiParam({ name: 'service', required: true })
   // @ApiParam({ name: 'project', required: true })

@@ -1,11 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import {HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
+import {PrismaService} from "../prisma/prisma.service";
+import * as process from "process";
+import {ServiceService} from "../service/service.service";
 
 @Injectable()
 export class DeploymentService {
-  create(createDeploymentDto: CreateDeploymentDto) {
-    return 'This action adds a new deployment';
+
+  constructor(private prisma: PrismaService) {}
+  async create(email: string, projectId: string, serviceId: string) {
+    const querry = await this.prisma.user.findUnique({
+      where: {
+        email: email
+      },
+      select: {
+        projects: {
+          where: {
+            id: projectId
+          },
+          select: {
+            services: {
+              where: {
+                id: serviceId
+              }
+            }
+          }
+        }
+      }
+    })
+    if (querry.projects.length && querry.projects[0].services.length) {
+      await this.prisma.deployment.create({
+        data: {
+          serviceId: serviceId
+        }
+      });
+      return HttpStatus.CREATED;
+    }
+    throw new NotFoundException();
   }
 
   findAll() {
