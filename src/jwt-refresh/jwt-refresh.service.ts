@@ -1,5 +1,6 @@
 import {
-  Injectable, InternalServerErrorException,
+  Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -38,7 +39,10 @@ export class JwtRefreshService {
         },
       });
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code == 'P2002') {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code == 'P2002'
+      ) {
         return jti;
       }
       throw new InternalServerErrorException();

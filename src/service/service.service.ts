@@ -3,6 +3,7 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectService } from '../project/project.service';
+import * as process from "process";
 
 @Injectable()
 export class ServiceService {
@@ -29,7 +30,7 @@ export class ServiceService {
         userEmail: email,
       },
     });
-    if (!project) {
+    if (!project.length) {
       throw new NotFoundException();
     }
     return this.prisma.service.findMany({ where: { projectId: projectId } });

@@ -19,9 +19,6 @@ export class ServiceEntity implements Service {
   repository: string;
 
   @ApiProperty()
-  builderTemplate: number;
-
-  @ApiProperty()
   buildCommand: string;
 
   @ApiProperty()
@@ -38,6 +35,9 @@ export class ServiceEntity implements Service {
 
   @ApiProperty()
   variables: JsonObject;
+
+  @Exclude()
+  builderTemplate: number;
 
   @Exclude()
   projectId: string;

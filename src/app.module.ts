@@ -9,6 +9,7 @@ import { JwtRefreshModule } from './jwt-refresh/jwt-refresh.module';
 import { JwtAccessModule } from './jwt-access/jwt-access.module';
 import { ProjectModule } from './project/project.module';
 import { ServiceModule } from './service/service.module';
+import { DeploymentModule } from './deployment/deployment.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ServiceModule } from './service/service.module';
     JwtAccessModule,
     ProjectModule,
     ServiceModule,
+    DeploymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

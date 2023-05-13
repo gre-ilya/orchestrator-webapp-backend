@@ -3,6 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { JsonObject } from '../entities/service.entity';
 
 export class CreateServiceDto {
+  constructor(partial: Partial<CreateServiceDto>) {
+    Object.assign(this, partial);
+  }
+
   @IsString()
   @IsNotEmpty()
   @ApiProperty()

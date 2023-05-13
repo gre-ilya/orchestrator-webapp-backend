@@ -1,207 +1,226 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-    ClassSerializerInterceptor,
-    INestApplication,
-    ValidationPipe,
+  ClassSerializerInterceptor,
+  INestApplication,
+  ValidationPipe,
 } from '@nestjs/common';
 import * as request from 'supertest';
+import * as testingMethods from './testing-methods';
 import { Reflector } from '@nestjs/core';
 import { UserService } from '../src/user/user.service';
 import { AppModule } from '../src/app.module';
-import {CreateUserDto} from "../src/user/dto/create-user.dto";
-const crypto = require('crypto');
-const uuidValidate = require('uuid-validate');
-import {ProjectService} from "../src/project/project.service";
+import * as crypto from 'crypto';
+import * as uuidValidate from 'uuid-validate';
+import { ProjectService } from '../src/project/project.service';
+import { CreateProjectDto } from '../src/project/dto/create-project.dto';
+import { ProjectEntity } from '../src/project/entities/project.entity';
+import { UserEntity } from '../src/user/entities/user.entity';
 
 describe('project (e2e)', () => {
-    let app: INestApplication;
-    let userService: UserService;
-    let projectService: ProjectService;
-    let access_token: string;
-    let notExistingProjectUuid: string;
-    let otherUserProjectUuid: string;
+  let app: INestApplication;
+  let userService: UserService;
+  let projectService: ProjectService;
+  let accessToken: string;
+  let notExistingProjectUuid: string;
+  let userA: UserEntity, userB: UserEntity;
+  let userAProject = {
+    id: undefined,
+    name: 'project',
+  }
+  let userBProject: ProjectEntity;
 
-    const test_user = {
-        email: undefined,
-        password: 'superpass',
-    };
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+    userService = moduleFixture.get<UserService>(UserService);
 
-    const test_project = {
-        id: undefined,
-        name: 'project',
-    }
+    userA = await testingMethods.createNotExistingUser(userService);
+    userB = await testingMethods.createNotExistingUser(userService);
 
-    beforeAll(async () => {
-        const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [AppModule],
-        }).compile();
-        userService = moduleFixture.get<UserService>(UserService);
-        projectService = moduleFixture.get<ProjectService>(ProjectService);
-        let count = 0;
-        while (true) {
-            const test_email: string = `test${count}@mail.ru`;
-            try {
-                await userService.findOne(test_email);
-            } catch (NotFoundException) {
-                test_user.email = test_email;
-                await userService.create(new CreateUserDto(test_user.email, test_user.password));
-                break;
-            }
-            count++;
-        }
-        app = moduleFixture.createNestApplication();
-        app.useGlobalPipes(new ValidationPipe({whitelist: true}));
-        app.useGlobalInterceptors(
-            new ClassSerializerInterceptor(app.get(Reflector)),
-        );
-        await app.init();
-    });
+    projectService = moduleFixture.get<ProjectService>(ProjectService);
+    userBProject = await testingMethods.createProject(projectService, userB.email);
 
-    it('POST /projects Should return 401.', () => {
-        return request(app.getHttpServer()).post('/projects').send().expect(401);
-    });
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    app.useGlobalInterceptors(
+      new ClassSerializerInterceptor(app.get(Reflector)),
+    );
+    await app.init();
+  });
 
-    it('GET /projects Should return 401.', () => {
-        return request(app.getHttpServer()).get('/projects').send().expect(401);
-    });
+  it('POST /projects Should return 401.', () => {
+    return request(app.getHttpServer()).post('/projects').send().expect(401);
+  });
 
-    it('GET /projects/{project-random-uuid} Should return 401.', () => {
-        return request(app.getHttpServer()).get(`/projects/${crypto.randomUUID()}`).send().expect(401);
-    });
+  it('GET /projects Should return 401.', () => {
+    return request(app.getHttpServer()).get('/projects').send().expect(401);
+  });
 
-    it('PATCH /projects Should return 401.', () => {
-        return request(app.getHttpServer()).get('/projects').send().expect(401);
-    });
+  const projectRandomUuid = crypto.randomUUID();
+  it('GET /projects/{project} Should return 401.', () => {
+    return request(app.getHttpServer())
+      .get(`/projects/${projectRandomUuid}`)
+      .send()
+      .expect(401);
+  });
 
-    it('DELETE /projects Should return 401.', () => {
-        return request(app.getHttpServer()).get('/projects').send().expect(401);
-    });
+  it('PATCH /projects/{project} Should return 401.', () => {
+    return request(app.getHttpServer())
+      .get(`/projects/${projectRandomUuid}`)
+      .send()
+      .expect(401);
+  });
 
-    it('POST /auth/login Should return 201 and { access_token, refresh_token }', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/auth/login')
-            .send({ email: test_user.email, password: test_user.password })
-            .expect(201);
+  it('DELETE /projects/{project} Should return 401.', () => {
+    return request(app.getHttpServer())
+      .get(`/projects/${projectRandomUuid}`)
+      .send()
+      .expect(401);
+  });
 
-        access_token = `Bearer ${res.body.accessToken}`;
-    });
+  it('POST /auth/login Should return 201 and { accessToken, refresh_token }', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: userA.email, password: userA.password })
+      .expect(201);
+    accessToken = `Bearer ${res.body.accessToken}`;
+  });
 
-    it('GET /projects Should return 200 and zero projects.', async () => {
-        const req = await request(app.getHttpServer())
-            .get('/projects')
-            .set('Authorization', access_token)
-        expect(req.statusCode).toBe(200);
-        expect(req.body.length).toBe(0);
-    });
+  it('GET /projects Should return 200 and zero projects.', async () => {
+    const req = await request(app.getHttpServer())
+      .get('/projects')
+      .set('Authorization', accessToken);
+    expect(req.statusCode).toBe(200);
+    expect(req.body.length).toBe(0);
+  });
 
-    it.each([
-        [{ name: test_project.name }, 201],
-        [{ name: test_project.name }, 201]
-    ])('POST /projects Should return 201 and { id, name }.', async (req, responseStatusCode) => {
-        const res = await request(app.getHttpServer())
-            .post('/projects')
-            .set('Authorization', access_token)
-            .send(req)
+  it.each([
+    [{ name: userAProject.name }, 201],
+    [{ name: userAProject.name }, 201],
+  ])(
+    'POST /projects Should return 201 and { id, name }.',
+    async (req, responseStatusCode) => {
+      const res = await request(app.getHttpServer())
+        .post('/projects')
+        .set('Authorization', accessToken)
+        .send(req);
 
-        expect(res.statusCode).toBe(responseStatusCode);
-        expect(res.body.name).toBe(test_project.name);
-        expect(uuidValidate(res.body.id)).toBeTruthy();
-        test_project.id = res.body.id;
-    });
+      expect(res.statusCode).toBe(responseStatusCode);
+      expect(res.body.name).toBe(userAProject.name);
+      expect(uuidValidate(res.body.id)).toBeTruthy();
+      userAProject.id = res.body.id;
+    },
+  );
 
-    it('GET /projects Should return 200 and two projects.', async () => {
-        const req = await request(app.getHttpServer())
-            .get('/projects')
-            .set('Authorization', access_token)
-        expect(req.statusCode).toBe(200);
-        expect(req.body.length).toBe(2);
-        expect(req.body[0].name).toBe(test_project.name);
-        expect(uuidValidate(req.body[0].id)).toBeTruthy();
-    });
+  it('GET /projects Should return 200 and two projects.', async () => {
+    const req = await request(app.getHttpServer())
+      .get('/projects')
+      .set('Authorization', accessToken);
+    expect(req.statusCode).toBe(200);
+    expect(req.body.length).toBe(2);
+    expect(req.body[0].name).toBe(userAProject.name);
+    expect(uuidValidate(req.body[0].id)).toBeTruthy();
+  });
 
-    it('GET /projects/{not-uuid} Should return 400.', () => {
-        request(app.getHttpServer())
-            .get('/projects/not-uuid')
-            .set('Authorization', access_token)
-            .expect(400);
-    });
+  it('GET /projects/{not-uuid} Should return 400.', () => {
+    request(app.getHttpServer())
+      .get('/projects/not-uuid')
+      .set('Authorization', accessToken)
+      .expect(400);
+  });
 
-    it('GET /projects/{project-not-existing-uuid} Should return 404.', async () => {
-        while (true) {
-            notExistingProjectUuid = crypto.randomUUID();
-            console.log(notExistingProjectUuid)
-            try {
-                await projectService.findOne(test_user.email, notExistingProjectUuid);
-            } catch (NotFoundException) {
-                break;
-            }
-        }
-        request(app.getHttpServer())
-            .get(`/projects/${notExistingProjectUuid}`)
-            .set('Authorization', access_token)
-            .expect(404);
-    });
+  it('GET /projects/{not-existing-project} Should return 404.', async () => {
+    const notExistingProjectUuid = await testingMethods.generateNotExistingProjectUuid(projectService, userA.email)
+    request(app.getHttpServer())
+      .get(`/projects/${notExistingProjectUuid}`)
+      .set('Authorization', accessToken)
+      .expect(404);
+  });
 
-    it('GET /projects/{project-existing-uuid} Should return 200 and { id, name }.', async () => {
-        const res = await request(app.getHttpServer())
-            .get(`/projects/${test_project.id}`)
-            .set('Authorization', access_token)
-        expect(uuidValidate(res.body.id)).toBeTruthy();
-        expect(res.body.name).toBe(test_project.name);
-        expect(res.statusCode).toBe(200);
-    });
+  it('GET /projects/{project} Should return 200 and { id, name }.', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/projects/${userAProject.id}`)
+      .set('Authorization', accessToken);
+    expect(uuidValidate(res.body.id)).toBeTruthy();
+    expect(res.body.name).toBe(userAProject.name);
+    expect(res.statusCode).toBe(200);
+  });
 
-    it('PATCH /projects/{not-uuid} Should return 400.', () => {
-        request(app.getHttpServer())
-            .patch('/projects/not-uuid')
-            .set('Authorization', access_token)
-            .send({ name: 'newname' })
-            .expect(400);
-    });
+  it('GET /projects/{other-user-project} Should return 404.', async () => {
+    request(app.getHttpServer())
+      .get(`/projects/${userBProject.id}`)
+      .set('Authorization', accessToken)
+      .expect(404);
+  });
 
+  it('PATCH /projects/{not-uuid} Should return 400.', () => {
+    request(app.getHttpServer())
+      .patch('/projects/not-uuid')
+      .set('Authorization', accessToken)
+      .send({ name: 'newname' })
+      .expect(400);
+  });
 
-    it('PATCH /projects/{project-not-existing-uuid} Should return 404.', async () => {
-        request(app.getHttpServer())
-            .patch(`/projects/${notExistingProjectUuid}`)
-            .set('Authorization', access_token)
-            .send({ name: 'newname' })
-            .expect(404);
-    });
+  it('PATCH /projects/{not-existing-project} Should return 404.', async () => {
+    request(app.getHttpServer())
+      .patch(`/projects/${notExistingProjectUuid}`)
+      .set('Authorization', accessToken)
+      .send({ name: 'newname' })
+      .expect(404);
+  });
 
-    it('PATCH /projects/{project-existing-uuid} Should return 200 and { name }.', async () => {
-        request(app.getHttpServer())
-            .patch(`/projects/${test_project.id}`)
-            .set('Authorization', access_token)
-            .send({ name: 'newname' })
-            .expect(200, { name: 'newname' });
-    });
+  it('PATCH /projects/{project} Should return 200 and { name }.', async () => {
+    request(app.getHttpServer())
+      .patch(`/projects/${userAProject.id}`)
+      .set('Authorization', accessToken)
+      .send({ name: 'newname' })
+      .expect(200, { name: 'newname' });
+  });
 
-    it('DELETE /projects/{not-uuid} Should return 400.', () => {
-        request(app.getHttpServer())
-            .delete('/projects/not-uuid')
-            .set('Authorization', access_token)
-            .expect(400);
-    });
+  it('PATCH /projects/{other-user-project} Should return 404.', async () => {
+    request(app.getHttpServer())
+      .patch(`/projects/${userBProject.id}`)
+      .set('Authorization', accessToken)
+      .send({ name: 'newname' })
+      .expect(404);
+  });
 
-    it('DELETE /projects/{project-not-existing-uuid} Should return 404.', async () => {
-        request(app.getHttpServer())
-            .delete(`/projects/${notExistingProjectUuid}`)
-            .set('Authorization', access_token)
-            .expect(404);
-    });
+  it('DELETE /projects/{not-uuid} Should return 400.', () => {
+    request(app.getHttpServer())
+      .delete('/projects/not-uuid')
+      .set('Authorization', accessToken)
+      .expect(400);
+  });
 
-    it('DELETE /projects/{project-existing-uuid} Should return 200.', async () => {
-        request(app.getHttpServer())
-            .delete(`/projects/${test_project.id}`)
-            .set('Authorization', access_token)
-            .expect(200);
-    });
+  it('DELETE /projects/{not-existing-project} Should return 404.', async () => {
+    request(app.getHttpServer())
+      .delete(`/projects/${notExistingProjectUuid}`)
+      .set('Authorization', accessToken)
+      .expect(404);
+  });
 
+  it('DELETE /projects/{project} Should return 200.', async () => {
+    request(app.getHttpServer())
+      .delete(`/projects/${userAProject.id}`)
+      .set('Authorization', accessToken)
+      .expect(200);
+  });
 
-    afterAll(async () => {
-        try {
-            await userService.remove(test_user.email);
-        } catch (err) {}
-        await app.close();
-    });
+  it('DELETE /projects/{other-user-project} Should return 404.', async () => {
+    request(app.getHttpServer())
+      .delete(`/projects/${userBProject.id}`)
+      .set('Authorization', accessToken)
+      .expect(404);
+  });
+
+  afterAll(async () => {
+    try {
+      await userService.remove(userA.email);
+    } catch (err) {}
+    try {
+      await userService.remove(userB.email);
+    } catch (err) {}
+    await app.close();
+  });
 });

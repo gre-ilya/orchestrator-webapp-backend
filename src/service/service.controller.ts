@@ -38,6 +38,7 @@ export class ServiceController {
     @Param() params,
     @Body() createServiceDto: CreateServiceDto,
   ) {
+    createServiceDto.projectId = params.projectId;
     return new ServiceEntity(
       await this.servicesService.create(
         req.user.email,
