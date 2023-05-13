@@ -3,7 +3,7 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectService } from '../project/project.service';
-import * as process from "process";
+import * as process from 'process';
 
 @Injectable()
 export class ServiceService {

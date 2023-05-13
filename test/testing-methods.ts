@@ -63,7 +63,10 @@ export async function createService(
   return new ServiceEntity(service);
 }
 
-export async function generateNotExistingProjectUuid(projectService: ProjectService, email: string) {
+export async function generateNotExistingProjectUuid(
+  projectService: ProjectService,
+  email: string,
+) {
   while (true) {
     const notExistingProjectUuid = crypto.randomUUID();
     try {

@@ -49,10 +49,11 @@ export class UserService {
       );
     }
     try {
-      return await this.prisma.user.update({
+      await this.prisma.user.update({
         where: { email },
         data: updateUserDto,
       });
+      return HttpStatus.OK;
     } catch (err) {
       if (
         err instanceof Prisma.PrismaClientKnownRequestError &&

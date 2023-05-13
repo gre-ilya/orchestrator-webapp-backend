@@ -23,10 +23,10 @@ describe('project (e2e)', () => {
   let accessToken: string;
   let notExistingProjectUuid: string;
   let userA: UserEntity, userB: UserEntity;
-  let userAProject = {
+  const userAProject = {
     id: undefined,
     name: 'project',
-  }
+  };
   let userBProject: ProjectEntity;
 
   beforeAll(async () => {
@@ -39,7 +39,10 @@ describe('project (e2e)', () => {
     userB = await testingMethods.createNotExistingUser(userService);
 
     projectService = moduleFixture.get<ProjectService>(ProjectService);
-    userBProject = await testingMethods.createProject(projectService, userB.email);
+    userBProject = await testingMethods.createProject(
+      projectService,
+      userB.email,
+    );
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -131,7 +134,11 @@ describe('project (e2e)', () => {
   });
 
   it('GET /projects/{not-existing-project} Should return 404.', async () => {
-    const notExistingProjectUuid = await testingMethods.generateNotExistingProjectUuid(projectService, userA.email)
+    const notExistingProjectUuid =
+      await testingMethods.generateNotExistingProjectUuid(
+        projectService,
+        userA.email,
+      );
     request(app.getHttpServer())
       .get(`/projects/${notExistingProjectUuid}`)
       .set('Authorization', accessToken)
