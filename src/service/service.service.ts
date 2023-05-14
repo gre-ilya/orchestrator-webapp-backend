@@ -3,7 +3,8 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectService } from '../project/project.service';
-import * as process from "process";
+import * as process from 'process';
+import {DeploymentService} from "../deployment/deployment.service";
 
 @Injectable()
 export class ServiceService {
@@ -24,22 +25,12 @@ export class ServiceService {
   }
 
   async findAll(email: string, projectId: string) {
-    const project = await this.prisma.project.findMany({
-      where: {
-        id: projectId,
-        userEmail: email,
-      },
-    });
-    if (!project.length) {
-      throw new NotFoundException();
-    }
+    await this.projectService.findOne(email, projectId);
     return this.prisma.service.findMany({ where: { projectId: projectId } });
   }
 
   async findOne(email: string, projectId: string, id: string) {
-    if (!(await this.projectService.findOne(email, projectId))) {
-      throw new NotFoundException();
-    }
+    await this.projectService.findOne(email, projectId);
     const result = await this.prisma.service.findFirst({
       where: { id: id, projectId: projectId },
     });
@@ -55,26 +46,22 @@ export class ServiceService {
     id: string,
     updateServiceDto: UpdateServiceDto,
   ) {
-    if (!(await this.projectService.findOne(email, projectId))) {
-      throw new NotFoundException();
-    }
-    const updateAmount = await this.prisma.service.updateMany({
+    await this.projectService.findOne(email, projectId);
+    const updatedData = await this.prisma.service.updateMany({
       where: {
         id: id,
         projectId: projectId,
       },
       data: updateServiceDto,
     });
-    if (!updateAmount.count) {
+    if (!updatedData.count) {
       throw new NotFoundException();
     }
     return HttpStatus.OK;
   }
 
   async remove(email: string, projectId: string, id: string) {
-    if (!(await this.projectService.findOne(email, projectId))) {
-      throw new NotFoundException();
-    }
+    await this.projectService.findOne(email, projectId);
     const deletedAmount = await this.prisma.service.deleteMany({
       where: {
         id: id,

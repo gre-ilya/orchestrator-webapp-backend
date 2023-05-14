@@ -54,14 +54,9 @@ export class ProjectController {
   @ApiOkResponse({ type: ProjectEntity })
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
-    const result = await this.projectService.findOne(
-      req.user.email,
-      params.project,
+    return new ProjectEntity(
+      await this.projectService.findOne(req.user.email, params.project),
     );
-    if (!result) {
-      throw new NotFoundException();
-    }
-    return new ProjectEntity(result);
   }
 
   @Patch(':project')
@@ -74,7 +69,7 @@ export class ProjectController {
     @Param() params,
     @Body() updateProjectDto: UpdateProjectDto,
   ) {
-    return this.projectService.update(
+    return await this.projectService.update(
       req.user.email,
       params.project,
       updateProjectDto,

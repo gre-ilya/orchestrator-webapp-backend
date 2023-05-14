@@ -97,12 +97,12 @@ describe('user (e2e)', () => {
       .expect(400);
   });
 
-  it('PATCH /users Should return 200 and { email } (password updated).', () => {
+  it('PATCH /users Should return 200.', () => {
     return request(app.getHttpServer())
       .patch('/users')
       .set('Authorization', accessToken)
       .send({ password: 'newsuperpass' })
-      .expect(200, { email: user.email });
+      .expect(200);
   });
 
   it('POST /auth/login Should return 401 (auth with old password).', async () => {

@@ -59,9 +59,9 @@ model Service {
 
 model Deployment {
   id         String           @id @default(uuid()) @db.Uuid()
-  buildLogs  String           @db.VarChar(32768)
-  deployLogs String           @db.VarChar(32768)
-  status     DeploymentStatus @default(Building)
+  buildLogs  String?           @db.VarChar(32768)
+  deployLogs String?           @db.VarChar(32768)
+  status     DeploymentStatus @default(Starting)
   buildDate  DateTime         @default(now())
 
   service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
@@ -75,7 +75,7 @@ enum UserRole {
 
 enum DeploymentStatus {
   Disabled
-  Provisioning
+  Starting
   Building
   Deploying
   Running

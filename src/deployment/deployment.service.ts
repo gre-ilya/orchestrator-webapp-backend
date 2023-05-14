@@ -1,26 +1,105 @@
-import { Injectable } from '@nestjs/common';
+import {HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
+import {PrismaService} from "../prisma/prisma.service";
+import * as process from "process";
+import {ServiceService} from "../service/service.service";
 
 @Injectable()
 export class DeploymentService {
-  create(createDeploymentDto: CreateDeploymentDto) {
-    return 'This action adds a new deployment';
+
+  constructor(private prisma: PrismaService, private serviceService: ServiceService) {}
+  async create(email: string, projectId: string, serviceId: string) {
+    const querry = await this.prisma.user.findUnique({
+      where: {
+        email
+      },
+      select: {
+        projects: {
+          where: {
+            id: projectId,
+          },
+          select: {
+            services: {
+              where: {
+                id: serviceId
+              }
+            }
+          }
+        }
+      }
+    })
+    if (querry.projects.length && querry.projects[0].services.length) {
+      return this.prisma.deployment.create({
+        data: {
+          serviceId: serviceId
+        }
+      });
+    }
+    throw new NotFoundException();
   }
 
-  findAll() {
-    return `This action returns all deployment`;
+  async findAll(email: string, projectId: string, serviceId: string) {
+    const query = await this.prisma.user.findUnique({
+      where: {
+        email
+      },
+      select: {
+        projects: {
+          where: {
+            id: projectId
+          },
+          select: {
+            services: {
+              where: {
+                projectId: projectId
+              },
+              select: {
+                deployments: {
+                  where: {
+                    serviceId: serviceId
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    return query.projects[0].services[0].deployments
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} deployment`;
+  async findOne(email: string, projectId: string, serviceId: string, deploymentId: string) {
+    await this.serviceService.findOne(email, projectId, serviceId);
+    return this.prisma.deployment.findUnique({ where: { id: deploymentId } })
   }
 
-  update(id: number, updateDeploymentDto: UpdateDeploymentDto) {
-    return `This action updates a #${id} deployment`;
+  async update(email: string, projectId: string, serviceId: string, deploymentId: string, updateDeploymentDto: UpdateDeploymentDto) {
+    await this.serviceService.findOne(email, projectId, serviceId);
+    const updatedData = await this.prisma.deployment.updateMany({
+      where: {
+        id: deploymentId,
+        serviceId: serviceId
+      },
+      data: updateDeploymentDto
+    })
+    if (!updatedData.count) {
+      throw new NotFoundException();
+    }
+    return HttpStatus.OK;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} deployment`;
+  async remove(email: string, projectId: string, serviceId: string, deploymentId: string) {
+    await this.serviceService.findOne(email, projectId, serviceId);
+    const deletedData = await this.prisma.deployment.deleteMany({
+      where: {
+        id: deploymentId,
+        serviceId: serviceId
+      },
+    });
+    if (!deletedData.count) {
+      throw new NotFoundException();
+    }
+    return HttpStatus.OK;
   }
 }

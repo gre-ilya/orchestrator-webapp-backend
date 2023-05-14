@@ -42,11 +42,9 @@ export class UserController {
   @Patch()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: UserEntity })
+  @ApiOkResponse()
   async update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
-    return new UserEntity(
-      await this.usersService.update(req.user.email, updateUserDto),
-    );
+    return await this.usersService.update(req.user.email, updateUserDto);
   }
 
   @Delete()
