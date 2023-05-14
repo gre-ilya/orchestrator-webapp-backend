@@ -8,16 +8,16 @@ import {ServiceService} from "../service/service.service";
 @Injectable()
 export class DeploymentService {
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private serviceService: ServiceService) {}
   async create(email: string, projectId: string, serviceId: string) {
     const querry = await this.prisma.user.findUnique({
       where: {
-        email: email
+        email
       },
       select: {
         projects: {
           where: {
-            id: projectId
+            id: projectId,
           },
           select: {
             services: {
@@ -30,22 +30,48 @@ export class DeploymentService {
       }
     })
     if (querry.projects.length && querry.projects[0].services.length) {
-      await this.prisma.deployment.create({
+      return this.prisma.deployment.create({
         data: {
           serviceId: serviceId
         }
       });
-      return HttpStatus.CREATED;
     }
     throw new NotFoundException();
   }
 
-  findAll() {
-    return `This action returns all deployment`;
+  async findAll(email: string, projectId: string, serviceId: string) {
+    const query = await this.prisma.user.findUnique({
+      where: {
+        email
+      },
+      select: {
+        projects: {
+          where: {
+            id: projectId
+          },
+          select: {
+            services: {
+              where: {
+                projectId: projectId
+              },
+              select: {
+                deployments: {
+                  where: {
+                    serviceId: serviceId
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    return query.projects[0].services[0].deployments
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} deployment`;
+  async findOne(email: string, projectId: string, serviceId: string, deploymentId: string) {
+    await this.serviceService.findOne(email, projectId, serviceId);
+    return this.prisma.deployment.findUnique({ where: { id: deploymentId } })
   }
 
   update(id: number, updateDeploymentDto: UpdateDeploymentDto) {

@@ -24,22 +24,12 @@ export class ServiceService {
   }
 
   async findAll(email: string, projectId: string) {
-    const project = await this.prisma.project.findMany({
-      where: {
-        id: projectId,
-        userEmail: email,
-      },
-    });
-    if (!project.length) {
-      throw new NotFoundException();
-    }
+    await this.projectService.findOne(email, projectId);
     return this.prisma.service.findMany({ where: { projectId: projectId } });
   }
 
   async findOne(email: string, projectId: string, id: string) {
-    if (!(await this.projectService.findOne(email, projectId))) {
-      throw new NotFoundException();
-    }
+    await this.projectService.findOne(email, projectId);
     const result = await this.prisma.service.findFirst({
       where: { id: id, projectId: projectId },
     });
@@ -55,9 +45,7 @@ export class ServiceService {
     id: string,
     updateServiceDto: UpdateServiceDto,
   ) {
-    if (!(await this.projectService.findOne(email, projectId))) {
-      throw new NotFoundException();
-    }
+    await this.projectService.findOne(email, projectId);
     const updateAmount = await this.prisma.service.updateMany({
       where: {
         id: id,
@@ -72,9 +60,7 @@ export class ServiceService {
   }
 
   async remove(email: string, projectId: string, id: string) {
-    if (!(await this.projectService.findOne(email, projectId))) {
-      throw new NotFoundException();
-    }
+    await this.projectService.findOne(email, projectId);
     const deletedAmount = await this.prisma.service.deleteMany({
       where: {
         id: id,
