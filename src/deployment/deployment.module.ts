@@ -11,5 +11,6 @@ import {ProjectService} from "../project/project.service";
   controllers: [DeploymentController],
   providers: [DeploymentService, ServiceService, ProjectService],
   imports: [PrismaModule, ServiceModule, ProjectModule],
+  exports: [DeploymentService]
 })
 export class DeploymentModule {}

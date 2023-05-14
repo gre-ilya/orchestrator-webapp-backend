@@ -26,7 +26,7 @@ import { ServicePreviewEntity } from './entities/service-preview.entity';
 @Controller('projects/:project/services')
 @ApiTags('services')
 export class ServiceController {
-  constructor(private readonly servicesService: ServiceService) {}
+  constructor(private readonly serviceService: ServiceService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -40,7 +40,7 @@ export class ServiceController {
   ) {
     createServiceDto.projectId = params.projectId;
     return new ServiceEntity(
-      await this.servicesService.create(
+      await this.serviceService.create(
         req.user.email,
         params.project,
         createServiceDto,
@@ -55,7 +55,7 @@ export class ServiceController {
   @ApiParam({ name: 'project', required: true })
   async findAll(@Request() req, @Param() params) {
     return ServicePreviewEntity.handleArray(
-      await this.servicesService.findAll(req.user.email, params.project),
+      await this.serviceService.findAll(req.user.email, params.project),
     );
   }
 
@@ -67,7 +67,7 @@ export class ServiceController {
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
     return new ServiceEntity(
-      await this.servicesService.findOne(
+      await this.serviceService.findOne(
         req.user.email,
         params.project,
         params.service,
@@ -86,7 +86,7 @@ export class ServiceController {
     @Param() params,
     @Body() updateServiceDto: UpdateServiceDto,
   ) {
-    return this.servicesService.update(
+    return this.serviceService.update(
       req.user.email,
       params.project,
       params.service,
@@ -101,7 +101,7 @@ export class ServiceController {
   @ApiParam({ name: 'service', required: true })
   @ApiParam({ name: 'project', required: true })
   async remove(@Request() req, @Param() params) {
-    return this.servicesService.remove(
+    return this.serviceService.remove(
       req.user.email,
       params.project,
       params.service,

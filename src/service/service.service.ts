@@ -11,7 +11,6 @@ export class ServiceService {
   constructor(
     private prisma: PrismaService,
     private projectService: ProjectService,
-    private deploymentService: DeploymentService
   ) {}
   async create(
     email: string,
@@ -22,9 +21,7 @@ export class ServiceService {
       throw new NotFoundException();
     }
     createServiceDto.projectId = projectId;
-    const createdService = await this.prisma.service.create({ data: createServiceDto });
-    await this.deploymentService.create(email, projectId, createdService.id);
-    return createdService;
+    return this.prisma.service.create({ data: createServiceDto });
   }
 
   async findAll(email: string, projectId: string) {
