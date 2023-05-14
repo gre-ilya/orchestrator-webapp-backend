@@ -71,17 +71,17 @@ export class DeploymentController {
   @ApiParam({ name: 'service', required: true })
   @ApiParam({ name: 'project', required: true })
   update(@Request() req, @Param() params, @Body() updateDeploymentDto: UpdateDeploymentDto) {
-    return this.deploymentService.update(+id, updateDeploymentDto);
+    return this.deploymentService.update(req.user.email, params.project, params.service, params.deployment, updateDeploymentDto);
   }
 
-  // @Delete(':deployment')
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
-  // @ApiOkResponse()
-  // @ApiParam({ name: 'deployment', required: true })
-  // @ApiParam({ name: 'service', required: true })
-  // @ApiParam({ name: 'project', required: true })
-  // remove(@Request() req, @Param() params) {
-  //   return this.deploymentService.remove(+id);
-  // }
+  @Delete(':deployment')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse()
+  @ApiParam({ name: 'deployment', required: true })
+  @ApiParam({ name: 'service', required: true })
+  @ApiParam({ name: 'project', required: true })
+  remove(@Request() req, @Param() params) {
+    return this.deploymentService.remove(req.user.email, params.project, params.service, params.deployment);
+  }
 }

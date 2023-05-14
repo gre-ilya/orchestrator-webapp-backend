@@ -74,11 +74,32 @@ export class DeploymentService {
     return this.prisma.deployment.findUnique({ where: { id: deploymentId } })
   }
 
-  update(id: number, updateDeploymentDto: UpdateDeploymentDto) {
-    return `This action updates a #${id} deployment`;
+  async update(email: string, projectId: string, serviceId: string, deploymentId: string, updateDeploymentDto: UpdateDeploymentDto) {
+    await this.serviceService.findOne(email, projectId, serviceId);
+    const updatedData = await this.prisma.deployment.updateMany({
+      where: {
+        id: deploymentId,
+        serviceId: serviceId
+      },
+      data: updateDeploymentDto
+    })
+    if (!updatedData.count) {
+      throw new NotFoundException();
+    }
+    return HttpStatus.OK;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} deployment`;
+  async remove(email: string, projectId: string, serviceId: string, deploymentId: string) {
+    await this.serviceService.findOne(email, projectId, serviceId);
+    const deletedData = await this.prisma.deployment.deleteMany({
+      where: {
+        id: deploymentId,
+        serviceId: serviceId
+      },
+    });
+    if (!deletedData.count) {
+      throw new NotFoundException();
+    }
+    return HttpStatus.OK;
   }
 }

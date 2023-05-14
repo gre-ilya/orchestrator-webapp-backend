@@ -4,12 +4,14 @@ import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectService } from '../project/project.service';
 import * as process from 'process';
+import {DeploymentService} from "../deployment/deployment.service";
 
 @Injectable()
 export class ServiceService {
   constructor(
     private prisma: PrismaService,
     private projectService: ProjectService,
+    private deploymentService: DeploymentService
   ) {}
   async create(
     email: string,
@@ -20,7 +22,9 @@ export class ServiceService {
       throw new NotFoundException();
     }
     createServiceDto.projectId = projectId;
-    return this.prisma.service.create({ data: createServiceDto });
+    const createdService = await this.prisma.service.create({ data: createServiceDto });
+    await this.deploymentService.create(email, projectId, createdService.id);
+    return createdService;
   }
 
   async findAll(email: string, projectId: string) {
@@ -46,14 +50,14 @@ export class ServiceService {
     updateServiceDto: UpdateServiceDto,
   ) {
     await this.projectService.findOne(email, projectId);
-    const updateAmount = await this.prisma.service.updateMany({
+    const updatedData = await this.prisma.service.updateMany({
       where: {
         id: id,
         projectId: projectId,
       },
       data: updateServiceDto,
     });
-    if (!updateAmount.count) {
+    if (!updatedData.count) {
       throw new NotFoundException();
     }
     return HttpStatus.OK;
