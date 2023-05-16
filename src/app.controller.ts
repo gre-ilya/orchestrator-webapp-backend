@@ -1,19 +1,18 @@
-import { Controller, Post } from '@nestjs/common';
-import { exec, spawn } from 'child_process';
-import * as process from 'process';
-
-const scriptExecution = spawn('orchestrator/script.sh');
+import {Controller, Get, Post} from '@nestjs/common';
+import {ApiTags} from "@nestjs/swagger";
+import {AppService} from "./app.service";
 
 @Controller()
+@ApiTags('orchestrator')
 export class AppController {
-  @Post('script')
-  async execScript() {
-    console.log(process.env);
-    exec('orchestrator/script.sh', (err, stdout, stderr) => {
-      if (err) {
-        console.log(err);
-      }
-      console.log(stdout);
-    });
+  constructor(
+      private appService: AppService,
+  ) {}
+
+  @Post('orchestrator')
+
+  async sendDeployment() {
+    console.log(await this.appService.post('http://172.17.0.1:8000/data', { one: 1, two: 2, three: 3 }));
+    return "OK";
   }
 }
