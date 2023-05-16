@@ -23,6 +23,7 @@ import { ServiceEntity } from './entities/service.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ServicePreviewEntity } from './entities/service-preview.entity';
 import * as uuid from 'uuid';
+import process from "process";
 
 @Controller('projects/:project/services')
 @ApiTags('services')

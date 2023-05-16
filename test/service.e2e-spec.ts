@@ -257,12 +257,12 @@ describe('service (e2e)', () => {
   });
 
   afterAll(async () => {
-    // try {
-    //   await userService.remove(userA.email);
-    // } catch (err) {}
-    // try {
-    //   await userService.remove(userB.email);
-    // } catch (err) {}
+    try {
+      await userService.remove(userA.email);
+    } catch (err) {}
+    try {
+      await userService.remove(userB.email);
+    } catch (err) {}
     await app.close();
   });
 });

@@ -78,7 +78,7 @@ describe('user (e2e)', () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: user.email, password: user.password })
-      .expect(201);
+    expect(res.statusCode).toBe(201);
     accessToken = `Bearer ${res.body.accessToken}`;
   });
 

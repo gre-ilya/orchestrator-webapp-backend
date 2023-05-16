@@ -73,6 +73,9 @@ export class ProjectController {
     @Param() params,
     @Body() updateProjectDto: UpdateProjectDto,
   ) {
+    if (!uuid.validate(params.project)) {
+      throw new BadRequestException()
+    }
     return await this.projectService.update(
       req.user.email,
       params.project,
@@ -86,6 +89,9 @@ export class ProjectController {
   @ApiOkResponse()
   @ApiParam({ name: 'project', required: true })
   async remove(@Request() req, @Param() params) {
+    if (!uuid.validate(params.project)) {
+      throw new BadRequestException()
+    }
     return await this.projectService.remove(req.user.email, params.project);
   }
 }
