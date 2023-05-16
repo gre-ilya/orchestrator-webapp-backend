@@ -4,8 +4,8 @@ import { ServiceController } from './service.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ProjectModule } from '../project/project.module';
 import { ProjectService } from '../project/project.service';
-import {DeploymentModule} from "../deployment/deployment.module";
-import {DeploymentService} from "../deployment/deployment.service";
+import { DeploymentModule } from '../deployment/deployment.module';
+import { DeploymentService } from '../deployment/deployment.service';
 
 @Module({
   controllers: [ServiceController],

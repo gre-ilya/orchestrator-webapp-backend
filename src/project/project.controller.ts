@@ -8,7 +8,8 @@ import {
   Delete,
   UseGuards,
   Request,
-  NotFoundException, BadRequestException,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -56,7 +57,7 @@ export class ProjectController {
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
     if (!uuid.validate(params.project)) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
     return new ProjectEntity(
       await this.projectService.findOne(req.user.email, params.project),
@@ -74,7 +75,7 @@ export class ProjectController {
     @Body() updateProjectDto: UpdateProjectDto,
   ) {
     if (!uuid.validate(params.project)) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
     return await this.projectService.update(
       req.user.email,
@@ -90,7 +91,7 @@ export class ProjectController {
   @ApiParam({ name: 'project', required: true })
   async remove(@Request() req, @Param() params) {
     if (!uuid.validate(params.project)) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
     return await this.projectService.remove(req.user.email, params.project);
   }

@@ -7,7 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request, BadRequestException,
+  Request,
+  BadRequestException,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -23,7 +24,7 @@ import { ServiceEntity } from './entities/service.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ServicePreviewEntity } from './entities/service-preview.entity';
 import * as uuid from 'uuid';
-import process from "process";
+import process from 'process';
 
 @Controller('projects/:project/services')
 @ApiTags('services')
@@ -41,7 +42,7 @@ export class ServiceController {
     @Body() createServiceDto: CreateServiceDto,
   ) {
     if (!uuid.validate(params.project)) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
 
     createServiceDto.projectId = params.project;
@@ -61,7 +62,7 @@ export class ServiceController {
   @ApiParam({ name: 'project', required: true })
   async findAll(@Request() req, @Param() params) {
     if (!uuid.validate(params.project)) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
     return ServicePreviewEntity.handleArray(
       await this.serviceService.findAll(req.user.email, params.project),
@@ -76,7 +77,7 @@ export class ServiceController {
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
     if (!uuid.validate(params.project) || !uuid.validate(params.service)) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
     return new ServiceEntity(
       await this.serviceService.findOne(
@@ -99,7 +100,7 @@ export class ServiceController {
     @Body() updateServiceDto: UpdateServiceDto,
   ) {
     if (!uuid.validate(params.project) || !uuid.validate(params.service)) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
     return this.serviceService.update(
       req.user.email,

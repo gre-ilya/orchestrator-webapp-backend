@@ -10,12 +10,12 @@ import { Reflector } from '@nestjs/core';
 import { UserService } from '../src/user/user.service';
 import { AppModule } from '../src/app.module';
 import * as crypto from 'crypto';
-import * as uuidValidate from 'uuid-validate';
+import * as uuid from 'uuid';
 import { ProjectService } from '../src/project/project.service';
 import { CreateProjectDto } from '../src/project/dto/create-project.dto';
 import { ProjectEntity } from '../src/project/entities/project.entity';
 import { UserEntity } from '../src/user/entities/user.entity';
-import process from "process";
+import process from 'process';
 
 describe('project (e2e)', () => {
   let app: INestApplication;
@@ -38,6 +38,12 @@ describe('project (e2e)', () => {
 
     userA = await testingMethods.createNotExistingUser(userService);
     userB = await testingMethods.createNotExistingUser(userService);
+
+    notExistingProjectUuid =
+      await testingMethods.generateNotExistingProjectUuid(
+        projectService,
+        userA.email,
+      );
 
     projectService = moduleFixture.get<ProjectService>(ProjectService);
     userBProject = await testingMethods.createProject(
@@ -112,7 +118,7 @@ describe('project (e2e)', () => {
 
       expect(res.statusCode).toBe(responseStatusCode);
       expect(res.body.name).toBe(userAProject.name);
-      expect(uuidValidate(res.body.id)).toBeTruthy();
+      expect(uuid.validate(res.body.id)).toBeTruthy();
       userAProject.id = res.body.id;
     },
   );
@@ -124,7 +130,7 @@ describe('project (e2e)', () => {
     expect(req.statusCode).toBe(200);
     expect(req.body.length).toBe(2);
     expect(req.body[0].name).toBe(userAProject.name);
-    expect(uuidValidate(req.body[0].id)).toBeTruthy();
+    expect(uuid.validate(req.body[0].id)).toBeTruthy();
   });
 
   it('GET /projects/{not-uuid} Should return 400.', () => {
@@ -135,11 +141,6 @@ describe('project (e2e)', () => {
   });
 
   it('GET /projects/{not-existing-project} Should return 404.', async () => {
-    const notExistingProjectUuid =
-      await testingMethods.generateNotExistingProjectUuid(
-        projectService,
-        userA.email,
-      );
     request(app.getHttpServer())
       .get(`/projects/${notExistingProjectUuid}`)
       .set('Authorization', accessToken)
@@ -150,7 +151,7 @@ describe('project (e2e)', () => {
     const res = await request(app.getHttpServer())
       .get(`/projects/${userAProject.id}`)
       .set('Authorization', accessToken);
-    expect(uuidValidate(res.body.id)).toBeTruthy();
+    expect(uuid.validate(res.body.id)).toBeTruthy();
     expect(res.body.name).toBe(userAProject.name);
     expect(res.statusCode).toBe(200);
   });
@@ -170,7 +171,7 @@ describe('project (e2e)', () => {
       .expect(400);
   });
 
-  it('PATCH /projects/{not-existing-project} Should return 404.',  () => {
+  it('PATCH /projects/{not-existing-project} Should return 404.', () => {
     return request(app.getHttpServer())
       .patch(`/projects/${notExistingProjectUuid}`)
       .set('Authorization', accessToken)
@@ -186,23 +187,22 @@ describe('project (e2e)', () => {
       .expect(404);
   });
 
-  it('PATCH /projects/{project} Should return 200.',  () => {
+  it('PATCH /projects/{project} Should return 200.', () => {
     return request(app.getHttpServer())
-        .patch(`/projects/${userAProject.id}`)
-        .set('Authorization', accessToken)
-        .send({ name: 'newname' })
-        .expect(200);
+      .patch(`/projects/${userAProject.id}`)
+      .set('Authorization', accessToken)
+      .send({ name: 'newname' })
+      .expect(200);
   });
 
   it('GET /projects/{project} Should return 200 and { id, name: newname }.', async () => {
     const res = await request(app.getHttpServer())
-        .get(`/projects/${userAProject.id}`)
-        .set('Authorization', accessToken);
-    expect(uuidValidate(res.body.id)).toBeTruthy();
+      .get(`/projects/${userAProject.id}`)
+      .set('Authorization', accessToken);
+    expect(uuid.validate(res.body.id)).toBeTruthy();
     expect(res.body.name).toStrictEqual('newname');
     expect(res.statusCode).toBe(200);
   });
-
 
   it('DELETE /projects/{not-uuid} Should return 400.', () => {
     request(app.getHttpServer())
@@ -227,25 +227,25 @@ describe('project (e2e)', () => {
 
   it('DELETE /projects/{project} Should return 200.', async () => {
     request(app.getHttpServer())
-        .delete(`/projects/${userAProject.id}`)
-        .set('Authorization', accessToken)
-        .expect(200);
+      .delete(`/projects/${userAProject.id}`)
+      .set('Authorization', accessToken)
+      .expect(200);
   });
 
   it('DELETE /projects/{project} Should return 404.', async () => {
     request(app.getHttpServer())
-        .delete(`/projects/${userAProject.id}`)
-        .set('Authorization', accessToken)
-        .expect(404);
+      .delete(`/projects/${userAProject.id}`)
+      .set('Authorization', accessToken)
+      .expect(404);
   });
 
   afterAll(async () => {
-    // try {
-    //   await userService.remove(userA.email);
-    // } catch (err) {}
-    // try {
-    //   await userService.remove(userB.email);
-    // } catch (err) {}
+    try {
+      await userService.remove(userA.email);
+    } catch (err) {}
+    try {
+      await userService.remove(userB.email);
+    } catch (err) {}
     await app.close();
   });
 });
