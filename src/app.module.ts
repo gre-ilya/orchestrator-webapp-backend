@@ -10,7 +10,7 @@ import { JwtAccessModule } from './jwt-access/jwt-access.module';
 import { ProjectModule } from './project/project.module';
 import { ServiceModule } from './service/service.module';
 import { DeploymentModule } from './deployment/deployment.module';
-import {HttpModule} from "@nestjs/axios";
+import { HttpModule } from '@nestjs/axios';
 import { OrchestratorModule } from './orchestrator/orchestrator.module';
 
 @Module({
@@ -25,7 +25,7 @@ import { OrchestratorModule } from './orchestrator/orchestrator.module';
     ServiceModule,
     DeploymentModule,
     HttpModule,
-    OrchestratorModule
+    OrchestratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

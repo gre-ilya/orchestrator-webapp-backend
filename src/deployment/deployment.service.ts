@@ -1,18 +1,20 @@
-import {HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
-import {PrismaService} from "../prisma/prisma.service";
-import * as process from "process";
-import {ServiceService} from "../service/service.service";
+import { PrismaService } from '../prisma/prisma.service';
+import * as process from 'process';
+import { ServiceService } from '../service/service.service';
 
 @Injectable()
 export class DeploymentService {
-
-  constructor(private prisma: PrismaService, private serviceService: ServiceService) {}
+  constructor(
+    private prisma: PrismaService,
+    private serviceService: ServiceService,
+  ) {}
   async create(email: string, projectId: string, serviceId: string) {
     const querry = await this.prisma.user.findUnique({
       where: {
-        email
+        email,
       },
       select: {
         projects: {
@@ -22,18 +24,18 @@ export class DeploymentService {
           select: {
             services: {
               where: {
-                id: serviceId
-              }
-            }
-          }
-        }
-      }
-    })
+                id: serviceId,
+              },
+            },
+          },
+        },
+      },
+    });
     if (querry.projects.length && querry.projects[0].services.length) {
       return this.prisma.deployment.create({
         data: {
-          serviceId: serviceId
-        }
+          serviceId: serviceId,
+        },
       });
     }
     throw new NotFoundException();
@@ -42,59 +44,75 @@ export class DeploymentService {
   async findAll(email: string, projectId: string, serviceId: string) {
     const query = await this.prisma.user.findUnique({
       where: {
-        email
+        email,
       },
       select: {
         projects: {
           where: {
-            id: projectId
+            id: projectId,
           },
           select: {
             services: {
               where: {
-                projectId: projectId
+                projectId: projectId,
               },
               select: {
                 deployments: {
                   where: {
-                    serviceId: serviceId
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                    serviceId: serviceId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
-    return query.projects[0].services[0].deployments
+    return query.projects[0].services[0].deployments;
   }
 
-  async findOne(email: string, projectId: string, serviceId: string, deploymentId: string) {
+  async findOne(
+    email: string,
+    projectId: string,
+    serviceId: string,
+    deploymentId: string,
+  ) {
     await this.serviceService.findOne(email, projectId, serviceId);
-    return this.prisma.deployment.findUnique({ where: { id: deploymentId } })
+    return this.prisma.deployment.findUnique({ where: { id: deploymentId } });
   }
 
-  async update(email: string, projectId: string, serviceId: string, deploymentId: string, updateDeploymentDto: UpdateDeploymentDto) {
+  async update(
+    email: string,
+    projectId: string,
+    serviceId: string,
+    deploymentId: string,
+    updateDeploymentDto: UpdateDeploymentDto,
+  ) {
     await this.serviceService.findOne(email, projectId, serviceId);
     const updatedData = await this.prisma.deployment.updateMany({
       where: {
         id: deploymentId,
-        serviceId: serviceId
+        serviceId: serviceId,
       },
-      data: updateDeploymentDto
-    })
+      data: updateDeploymentDto,
+    });
     if (!updatedData.count) {
       throw new NotFoundException();
     }
     return HttpStatus.OK;
   }
 
-  async remove(email: string, projectId: string, serviceId: string, deploymentId: string) {
+  async remove(
+    email: string,
+    projectId: string,
+    serviceId: string,
+    deploymentId: string,
+  ) {
     await this.serviceService.findOne(email, projectId, serviceId);
     const deletedData = await this.prisma.deployment.deleteMany({
       where: {
         id: deploymentId,
-        serviceId: serviceId
+        serviceId: serviceId,
       },
     });
     if (!deletedData.count) {

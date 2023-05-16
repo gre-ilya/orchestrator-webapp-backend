@@ -2,7 +2,6 @@ import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import * as process from 'process';
 
 @Injectable()
 export class ProjectService {
@@ -20,10 +19,10 @@ export class ProjectService {
     return this.prisma.project.findMany({ where: { userEmail: email } });
   }
 
-  async findOne(email: string, uuid: string) {
+  async findOne(email: string, projectId: string) {
     const res = await this.prisma.project.findFirst({
       where: {
-        id: uuid,
+        id: projectId,
         userEmail: email,
       },
     });
@@ -35,11 +34,11 @@ export class ProjectService {
 
   async update(
     email: string,
-    uuid: string,
+    projectId: string,
     updateProjectDto: UpdateProjectDto,
   ) {
     const updatedAmount = await this.prisma.project.updateMany({
-      where: { id: uuid, userEmail: email },
+      where: { id: projectId, userEmail: email },
       data: updateProjectDto,
     });
     if (!updatedAmount.count) {
@@ -48,10 +47,10 @@ export class ProjectService {
     return HttpStatus.OK;
   }
 
-  async remove(email: string, uuid: string) {
+  async remove(email: string, projectId: string) {
     const res = await this.prisma.project.deleteMany({
       where: {
-        id: uuid,
+        id: projectId,
         userEmail: email,
       },
     });
