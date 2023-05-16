@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
+  Request, BadRequestException,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -22,6 +22,7 @@ import {
 import { ServiceEntity } from './entities/service.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ServicePreviewEntity } from './entities/service-preview.entity';
+import * as uuid from 'uuid';
 
 @Controller('projects/:project/services')
 @ApiTags('services')
@@ -38,7 +39,11 @@ export class ServiceController {
     @Param() params,
     @Body() createServiceDto: CreateServiceDto,
   ) {
-    createServiceDto.projectId = params.projectId;
+    if (!uuid.validate(params.project)) {
+      throw new BadRequestException()
+    }
+
+    createServiceDto.projectId = params.project;
     return new ServiceEntity(
       await this.serviceService.create(
         req.user.email,
@@ -54,6 +59,9 @@ export class ServiceController {
   @ApiOkResponse({ type: [ServicePreviewEntity] })
   @ApiParam({ name: 'project', required: true })
   async findAll(@Request() req, @Param() params) {
+    if (!uuid.validate(params.project)) {
+      throw new BadRequestException()
+    }
     return ServicePreviewEntity.handleArray(
       await this.serviceService.findAll(req.user.email, params.project),
     );
@@ -66,6 +74,9 @@ export class ServiceController {
   @ApiParam({ name: 'service', required: true })
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
+    if (!uuid.validate(params.project) || !uuid.validate(params.service)) {
+      throw new BadRequestException()
+    }
     return new ServiceEntity(
       await this.serviceService.findOne(
         req.user.email,
@@ -86,6 +97,9 @@ export class ServiceController {
     @Param() params,
     @Body() updateServiceDto: UpdateServiceDto,
   ) {
+    if (!uuid.validate(params.project) || !uuid.validate(params.service)) {
+      throw new BadRequestException()
+    }
     return this.serviceService.update(
       req.user.email,
       params.project,

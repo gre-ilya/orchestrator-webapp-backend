@@ -3,13 +3,13 @@
 all: down build up
 
 up:
-	docker compose -f docker-compose.local.yml --profile prod up -d
+	docker compose -f docker-compose.local.yml --profile test up -d
 
 down:
-	docker compose -f docker-compose.local.yml --profile prod down
+	docker compose -f docker-compose.local.yml --profile test down
 
 build:
-	docker compose -f docker-compose.local.yml --profile prod build
+	docker compose -f docker-compose.local.yml --profile test build
 
 all-test: down-test build-test up-test
 

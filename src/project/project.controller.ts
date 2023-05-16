@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
-  NotFoundException,
+  NotFoundException, BadRequestException,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -22,6 +22,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ProjectEntity } from './entities/project.entity';
+import * as uuid from 'uuid';
 
 @Controller('projects')
 @ApiTags('projects')
@@ -54,6 +55,9 @@ export class ProjectController {
   @ApiOkResponse({ type: ProjectEntity })
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
+    if (!uuid.validate(params.project)) {
+      throw new BadRequestException()
+    }
     return new ProjectEntity(
       await this.projectService.findOne(req.user.email, params.project),
     );

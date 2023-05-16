@@ -18,6 +18,7 @@ import { ServiceEntity } from '../src/service/entities/service.entity';
 import { ServiceService } from '../src/service/service.service';
 import { CreateServiceDto } from '../src/service/dto/create-service.dto';
 import * as process from 'process';
+import {UpdateServiceDto} from "../src/service/dto/update-service.dto";
 
 describe('service (e2e)', () => {
   let app: INestApplication;
@@ -25,7 +26,6 @@ describe('service (e2e)', () => {
   let projectService: ProjectService;
   let serviceService: ServiceService;
   let accessToken: string;
-  let userBServiceUuid: string;
   const serviceRequestDTO = {
     name: 'service',
     repository: 'https://github.com/user/project',
@@ -47,6 +47,7 @@ describe('service (e2e)', () => {
     id: null,
   };
   let userBService: ServiceEntity;
+  const randomUuid = crypto.randomUUID();
 
   const testProject = {
     id: undefined,
@@ -101,24 +102,23 @@ describe('service (e2e)', () => {
       .expect(401);
   });
 
-  const serviceRandomUuid = crypto.randomUUID();
   it('GET /projects/{project}/services/{service} Should return 401.', () => {
     return request(app.getHttpServer())
-      .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
+      .get(`/projects/${userAProject.id}/services/${randomUuid}`)
       .send()
       .expect(401);
   });
 
   it('PATCH /projects/{project}/services/{service} Should return 401.', () => {
     return request(app.getHttpServer())
-      .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
+      .get(`/projects/${userAProject.id}/services/${randomUuid}`)
       .send()
       .expect(401);
   });
 
   it('DELETE /projects/{project}/services/{service} Should return 401.', () => {
     return request(app.getHttpServer())
-      .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
+      .get(`/projects/${userAProject.id}/services/${randomUuid}`)
       .send()
       .expect(401);
   });
@@ -131,6 +131,20 @@ describe('service (e2e)', () => {
     accessToken = `Bearer ${res.body.accessToken}`;
   });
 
+  it('GET /projects/{not-uuid}/services Should return 400.', async () => {
+    const req = await request(app.getHttpServer())
+        .get(`/projects/not-uuid/services`)
+        .set('Authorization', accessToken)
+        .expect(400);
+  });
+
+  it('GET /projects/{other-user-project}/services Should return 404.', async () => {
+    return request(app.getHttpServer())
+        .get(`/projects/${userBProject.id}/services`)
+        .set('Authorization', accessToken)
+        .expect(404);
+  });
+
   it('GET /projects/{project}/services Should return 200 and zero services.', async () => {
     const req = await request(app.getHttpServer())
       .get(`/projects/${userAProject.id}/services`)
@@ -139,23 +153,24 @@ describe('service (e2e)', () => {
     expect(req.body.length).toBe(0);
   });
 
-  it('GET /projects/{other-user-project}/services Should return 404.', async () => {
+
+  it('GET /projects/{project}/services/{not-uuid} Should return 400.', async () => {
     return request(app.getHttpServer())
-      .get(`/projects/${userBProject.id}/services`)
-      .set('Authorization', accessToken)
-      .expect(404);
+        .get(`/projects/${userAProject.id}/services/not-uuid`)
+        .set('Authorization', accessToken)
+        .expect(400);
   });
 
   it('GET /projects/{project}/services/{not-existing-service} Should return 404.', async () => {
     return request(app.getHttpServer())
-      .get(`/projects/${userAProject.id}/services/${serviceRandomUuid}`)
+      .get(`/projects/${userAProject.id}/services/${randomUuid}`)
       .set('Authorization', accessToken)
       .expect(404);
   });
 
   it('GET /projects/{other-user-project}/services/{other-user-service} Should return 404.', async () => {
     return request(app.getHttpServer())
-      .get(`/projects/${userBProject.id}/services/${userBServiceUuid}`)
+      .get(`/projects/${userBProject.id}/services/${userBService.id}`)
       .set('Authorization', accessToken)
       .expect(404);
   });
@@ -211,13 +226,43 @@ describe('service (e2e)', () => {
     expect(req.body).toStrictEqual(serviceResponseDTO);
   });
 
+  it('PATCH /projects/{project}/services/{not-uuid} Should return 400.', async () => {
+    return request(app.getHttpServer())
+        .patch(`/projects/${userAProject.id}/services/not-uuid`)
+        .set('Authorization', accessToken)
+        .expect(400);
+  });
+
+  it('PATCH /projects/{project}/services/{not-existing-service} Should return 404.', async () => {
+    return request(app.getHttpServer())
+        .patch(`/projects/${userAProject.id}/services/${randomUuid}`)
+        .set('Authorization', accessToken)
+        .expect(404);
+  });
+
+  it('PATCH /projects/{other-user-project}/services/{other-user-service} Should return 404.', async () => {
+    return request(app.getHttpServer())
+        .patch(`/projects/${userBProject.id}/services/${userBService.id}`)
+        .set('Authorization', accessToken)
+        .expect(404);
+  });
+
+  it('PATCH /projects/{project}/services/{service} Should return 400.', async () => {
+    console.log(process.env.DELIMITER, userAProject.id, userAService.id)
+    return request(app.getHttpServer())
+        .patch(`/projects/${userAProject.id}/services/${userAService.id}`)
+        .send(new UpdateServiceDto({ name: 'newname', repository: 'notlink' }))
+        .set('Authorization', accessToken)
+        .expect(400);
+  });
+
   afterAll(async () => {
-    try {
-      await userService.remove(userA.email);
-    } catch (err) {}
-    try {
-      await userService.remove(userB.email);
-    } catch (err) {}
+    // try {
+    //   await userService.remove(userA.email);
+    // } catch (err) {}
+    // try {
+    //   await userService.remove(userB.email);
+    // } catch (err) {}
     await app.close();
   });
 });
