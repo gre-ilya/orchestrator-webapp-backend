@@ -250,10 +250,9 @@ describe('service (e2e)', () => {
   });
 
   it('PATCH /projects/{project}/services/{service} Should return 400.', () => {
-    console.log(process.env.DELIMITER, userAProject.id, userAService.id);
     return request(app.getHttpServer())
       .patch(`/projects/${userAProject.id}/services/${userAService.id}`)
-      .send(new UpdateServiceDto({ name: 'newname', repository: 'notlink' }))
+      .send({ name: 'newname', repository: 'notlink' })
       .set('Authorization', accessToken)
       .expect(400);
   });
