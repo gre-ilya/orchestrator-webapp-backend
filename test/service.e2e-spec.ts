@@ -257,6 +257,8 @@ describe('service (e2e)', () => {
       .expect(400);
   });
 
+  it('PATCH /')
+
   afterAll(async () => {
     try {
       await userService.remove(userA.email);
