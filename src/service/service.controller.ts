@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
-  BadRequestException,
+  NotFoundException
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -42,7 +42,7 @@ export class ServiceController {
     @Body() createServiceDto: CreateServiceDto,
   ) {
     if (!uuid.validate(params.project)) {
-      throw new BadRequestException();
+      throw new NotFoundException();
     }
 
     createServiceDto.projectId = params.project;
@@ -62,7 +62,7 @@ export class ServiceController {
   @ApiParam({ name: 'project', required: true })
   async findAll(@Request() req, @Param() params) {
     if (!uuid.validate(params.project)) {
-      throw new BadRequestException();
+      throw new NotFoundException();
     }
     return ServicePreviewEntity.handleArray(
       await this.serviceService.findAll(req.user.email, params.project),
@@ -77,7 +77,7 @@ export class ServiceController {
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
     if (!uuid.validate(params.project) || !uuid.validate(params.service)) {
-      throw new BadRequestException();
+      throw new NotFoundException();
     }
     return new ServiceEntity(
       await this.serviceService.findOne(
@@ -100,7 +100,7 @@ export class ServiceController {
     @Body() updateServiceDto: UpdateServiceDto,
   ) {
     if (!uuid.validate(params.project) || !uuid.validate(params.service)) {
-      throw new BadRequestException();
+      throw new NotFoundException();
     }
     return this.serviceService.update(
       req.user.email,

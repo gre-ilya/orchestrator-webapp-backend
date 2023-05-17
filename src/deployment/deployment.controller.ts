@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
-  Query,
+  Query, NotFoundException,
 } from '@nestjs/common';
 import { DeploymentService } from './deployment.service';
 import { CreateDeploymentDto } from './dto/create-deployment.dto';
@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { DeploymentEntity } from './entities/deployment.entity';
 import { DeploymentPreviewEntity } from './entities/deployment-preview.entity';
+import * as uuid from 'uuid';
 
 @Controller('projects/:project/services/:service/deployments')
 @ApiTags('deployments')
@@ -73,6 +74,9 @@ export class DeploymentController {
   @ApiParam({ name: 'service', required: true })
   @ApiParam({ name: 'project', required: true })
   async findOne(@Request() req, @Param() params) {
+    if (!uuid.validate(params.deployment)) {
+      throw new NotFoundException();
+    }
     return new DeploymentEntity(
       await this.deploymentService.findOne(
         req.user.email,
@@ -95,6 +99,9 @@ export class DeploymentController {
     @Param() params,
     @Body() updateDeploymentDto: UpdateDeploymentDto,
   ) {
+    if (!uuid.validate(params.deployment)) {
+      throw new NotFoundException();
+    }
     return this.deploymentService.update(
       req.user.email,
       params.project,
@@ -112,6 +119,9 @@ export class DeploymentController {
   @ApiParam({ name: 'service', required: true })
   @ApiParam({ name: 'project', required: true })
   remove(@Request() req, @Param() params) {
+    if (!uuid.validate(params.deployment)) {
+      throw new NotFoundException();
+    }
     return this.deploymentService.remove(
       req.user.email,
       params.project,
