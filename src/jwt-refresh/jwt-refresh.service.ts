@@ -27,9 +27,9 @@ export class JwtRefreshService {
     });
   }
 
-  async createRefreshToken(email: string) {
+  async createRefreshToken(email: string, role: string) {
     await this.killSessions(email);
-    const jti = await this.jwtService.signAsync({ email: email });
+    const jti = await this.jwtService.signAsync({ email: email, role: role });
     try {
       await this.prisma.refreshToken.create({
         data: {
@@ -79,9 +79,10 @@ export class JwtRefreshService {
     }
     const email = this.jwtService.decode(jti)['email'];
     await this.killSessions(email);
+    const role = this.jwtService.decode(jti)['role'];
     return {
-      accessToken: await this.jwtAccessService.createAccessToken(email),
-      refreshToken: await this.createRefreshToken(email),
+      accessToken: await this.jwtAccessService.createAccessToken(email, role),
+      refreshToken: await this.createRefreshToken(email, role),
     };
   }
 }

@@ -11,7 +11,6 @@ import { ProjectModule } from './project/project.module';
 import { ServiceModule } from './service/service.module';
 import { DeploymentModule } from './deployment/deployment.module';
 import { HttpModule } from '@nestjs/axios';
-import { OrchestratorModule } from './orchestrator/orchestrator.module';
 
 @Module({
   imports: [
@@ -25,7 +24,6 @@ import { OrchestratorModule } from './orchestrator/orchestrator.module';
     ServiceModule,
     DeploymentModule,
     HttpModule,
-    OrchestratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
