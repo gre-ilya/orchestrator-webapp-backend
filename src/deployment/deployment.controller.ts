@@ -108,6 +108,7 @@ export class DeploymentController {
       params.service,
       params.deployment,
       updateDeploymentDto,
+        false
     );
   }
 
