@@ -1,4 +1,5 @@
 import {
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -39,5 +40,17 @@ export class AuthService {
       accessToken: await this.jwtAccessService.createAccessToken(user.email, user.role),
       refreshToken: await this.jwtRefreshService.createRefreshToken(user.email, user.role),
     };
+  }
+
+  async logout(email: string) {
+    const logout = await this.prisma.refreshToken.updateMany({
+      where: {
+        userEmail: email
+      },
+      data: {
+        revoked: true
+      }
+    });
+    return HttpStatus.OK;
   }
 }

@@ -12,7 +12,7 @@ datasource db {
 
 model User {
   email          String   @id @db.VarChar(128)
-  password   String   @db.VarChar(256)
+  password       String   @db.VarChar(256)
   role           UserRole @default(User)
   isActivated    Boolean  @default(false)
   activationLink String?  @db.VarChar(256)
@@ -59,8 +59,8 @@ model Service {
 
 model Deployment {
   id         String           @id @default(uuid()) @db.Uuid()
-  buildLogs  String?           @db.VarChar(32768)
-  deployLogs String?           @db.VarChar(32768)
+  buildLogs  String?          @db.VarChar(32768)
+  deployLogs String?          @db.VarChar(32768)
   status     DeploymentStatus @default(Starting)
   buildDate  DateTime         @default(now())
 
