@@ -46,7 +46,7 @@ describe('UsersService (integration)', () => {
         activationLink: null,
       };
       const returnedValue = await service.create(
-        new CreateUserDto(test_user.email, test_user.password),
+        new CreateUserDto({ email: test_user.email, password: test_user.password }),
       );
       expect(returnedValue).toStrictEqual(expectedUser);
       expect(
@@ -56,7 +56,7 @@ describe('UsersService (integration)', () => {
 
     it('Should throw ConflictException.', async () => {
       await expect(
-        service.create(new CreateUserDto(test_user.email, test_user.password)),
+        service.create(new CreateUserDto({ email: test_user.email, password: test_user.password })),
       ).rejects.toThrow(ConflictException);
     });
   });

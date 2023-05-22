@@ -64,13 +64,13 @@ describe('UsersController (unit)', () => {
   describe('/user', () => {
     it('POST. Should return created user credentials.', async () => {
       expect(
-        await controller.create(new CreateUserDto('anna@mail.ru', 'superpass')),
+        await controller.create(new CreateUserDto({ email: 'anna@mail.ru', password: 'superpass' })),
       ).toStrictEqual(new UserEntity({ email: 'anna@mail.ru' }));
     });
 
     it('POST. Should throw ConflictErrorException', async () => {
       await expect(
-        controller.create(new CreateUserDto('anna@mail.ru', 'superpass')),
+        controller.create(new CreateUserDto({ email: 'anna@mail.ru', password: 'superpass' })),
       ).rejects.toThrow(ConflictException);
     });
 
