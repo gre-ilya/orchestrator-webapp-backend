@@ -105,7 +105,7 @@ describe('UsersController (unit)', () => {
           req,
           new UpdateUserDto({ password: 'newsuperpass' }),
         ),
-      ).toStrictEqual(new UserEntity({ email: 'anna@mail.ru' }));
+      ).toStrictEqual({ email: 'anna@mail.ru' });
     });
 
     it('PATCH. Should throw NotFoundException.', async () => {

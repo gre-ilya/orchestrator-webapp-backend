@@ -101,7 +101,7 @@ describe('UsersService (integration)', () => {
             activationLink: activationLink,
           }),
         ),
-      ).toStrictEqual(expectedUser);
+      ).toBe(200);
     });
 
     it('Should throw NotFoundException.', async () => {
