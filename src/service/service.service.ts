@@ -6,12 +6,35 @@ import { ProjectService } from '../project/project.service';
 import * as process from 'process';
 import { DeploymentService } from '../deployment/deployment.service';
 
+function getRandomInteger(min: number, max: number) {
+  return Math.floor(
+      Math.random() * (max - min) + min
+  );
+}
+
 @Injectable()
 export class ServiceService {
   constructor(
     private prisma: PrismaService,
     private projectService: ProjectService,
   ) {}
+
+  async getAvailablePort(): Promise<number> {
+    let randomPort: number;
+    while (true) {
+      randomPort = getRandomInteger(1024, 64000);
+      let serviceWithRandomPort = await this.prisma.service.findMany({ where: { port: randomPort } });
+      if (serviceWithRandomPort.length == 0) {
+        break;
+      }
+    }
+    return randomPort;
+  }
+
+  async assignPort() {
+
+  }
+
   async create(
     email: string,
     projectId: string,
@@ -21,6 +44,7 @@ export class ServiceService {
       throw new NotFoundException();
     }
     createServiceDto.projectId = projectId;
+    await this.assignPort();
     return this.prisma.service.create({ data: createServiceDto });
   }
 

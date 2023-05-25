@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import {IsNotEmpty, IsNumber, IsString, IsUrl} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { JsonObject } from '../entities/service.entity';
 
@@ -17,9 +17,16 @@ export class CreateServiceDto {
   @ApiProperty()
   repository: string;
 
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty()
+  internalPort: number;
+
   ip: string;
 
   port: number;
+
+  url: string;
 
   variables: JsonObject;
 
