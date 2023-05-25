@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  postgres:
+    image: 'postgres:13.5-alpine'
+    hostname: '${POSTGRES_HOST}'
+    profiles:
+      - 'prod'
+    volumes:
+      - 'postgres_volume:/var/lib/postgresql/data'
+    ports:
+      - '5432:5432'
+    env_file:
+      - './.env'
+
+  postgres-test:
+    image: 'postgres:13.5-alpine'
+    hostname: '${POSTGRES_HOST}'
+    profiles:
+      - 'test'
+    volumes:
+      - 'postgres_test_volume:/var/lib/postgresql/data'
+    ports:
+      - '5432:5432'
+    env_file:
+      - './.env'
+
+  app-server:
+    build:
+      dockerfile: "Dockerfile.local"
+    profiles:
+      - 'prod'
+      - 'test'
+    depends_on:
+      - 'postgres'
+      - 'postgres-test'
+    volumes:
+      - './:/app-dir'
+    environment:
+      WAIT_HOSTS: '${POSTGRES_HOST}:5432'
+    command: bash -c '/wait && tail -f /dev/null'
+    ports:
+      - '3000:3000'
+
+volumes:
+  postgres_volume:
+  postgres_test_volume:

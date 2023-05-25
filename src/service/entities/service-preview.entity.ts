@@ -42,6 +42,12 @@ export class ServicePreviewEntity implements Service {
   ip: string;
 
   @Exclude()
+  internalPort: number;
+
+  @Exclude()
+  url: string;
+
+  @Exclude()
   port: number;
 
   @Exclude()

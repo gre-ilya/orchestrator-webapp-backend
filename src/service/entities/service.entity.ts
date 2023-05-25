@@ -31,6 +31,12 @@ export class ServiceEntity implements Service {
   port: number;
 
   @ApiProperty()
+  internalPort: number;
+
+  @ApiProperty()
+  url: string;
+
+  @ApiProperty()
   status: DeploymentStatus;
 
   @ApiProperty()
