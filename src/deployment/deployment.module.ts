@@ -9,8 +9,8 @@ import { ProjectService } from '../project/project.service';
 
 @Module({
   controllers: [DeploymentController],
-  providers: [DeploymentService, ServiceService, ProjectService],
-  imports: [PrismaModule, ServiceModule, ProjectModule],
+  providers: [DeploymentService],
+  imports: [PrismaModule],
   exports: [DeploymentService],
 })
 export class DeploymentModule {}
