@@ -31,8 +31,9 @@ export class ServiceService {
     return randomPort;
   }
 
-  async assignPort() {
-
+  async assignPort(createServiceDto: CreateServiceDto) {
+    createServiceDto.port = await this.getAvailablePort();
+    return createServiceDto
   }
 
   async create(
@@ -44,8 +45,7 @@ export class ServiceService {
       throw new NotFoundException();
     }
     createServiceDto.projectId = projectId;
-    await this.assignPort();
-    return this.prisma.service.create({ data: createServiceDto });
+    return this.prisma.service.create({ data: await this.assignPort(createServiceDto) });
   }
 
   async findAll(email: string, projectId: string) {
