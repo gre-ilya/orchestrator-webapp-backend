@@ -22,7 +22,7 @@ export class ServiceService {
   async getAvailablePort(): Promise<number> {
     let randomPort: number;
     while (true) {
-      randomPort = getRandomInteger(1024, 64000);
+      randomPort = getRandomInteger(10000, 50000);
       let serviceWithRandomPort = await this.prisma.service.findMany({ where: { port: randomPort } });
       if (serviceWithRandomPort.length == 0) {
         break;

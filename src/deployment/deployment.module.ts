@@ -2,15 +2,12 @@ import { Module } from '@nestjs/common';
 import { DeploymentService } from './deployment.service';
 import { DeploymentController } from './deployment.controller';
 import { PrismaModule } from '../prisma/prisma.module';
-import { ServiceModule } from '../service/service.module';
-import { ServiceService } from '../service/service.service';
-import { ProjectModule } from '../project/project.module';
-import { ProjectService } from '../project/project.service';
+import {HttpModule, HttpService} from "@nestjs/axios";
 
 @Module({
   controllers: [DeploymentController],
+  imports: [PrismaModule, HttpModule],
   providers: [DeploymentService],
-  imports: [PrismaModule],
   exports: [DeploymentService],
 })
 export class DeploymentModule {}

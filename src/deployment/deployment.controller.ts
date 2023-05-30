@@ -28,7 +28,9 @@ import * as uuid from 'uuid';
 @Controller('projects/:project/services/:service/deployments')
 @ApiTags('deployments')
 export class DeploymentController {
-  constructor(private readonly deploymentService: DeploymentService) {}
+  constructor(
+      private deploymentService: DeploymentService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
