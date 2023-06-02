@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import {forwardRef, Module} from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { ServiceController } from './service.controller';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -11,7 +11,7 @@ import {HttpModule} from "@nestjs/axios";
 @Module({
   controllers: [ServiceController],
   providers: [ServiceService, ProjectService, DeploymentService],
-  imports: [PrismaModule, ProjectModule, DeploymentModule, HttpModule],
+  imports: [PrismaModule, ProjectModule, HttpModule, forwardRef(() => DeploymentModule)],
   exports: [ServiceService],
 })
 export class ServiceModule {}

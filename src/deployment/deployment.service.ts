@@ -11,6 +11,7 @@ import { ServiceService } from '../service/service.service';
 import {HttpService} from "@nestjs/axios";
 import * as process from 'process';
 import {firstValueFrom} from "rxjs";
+import {Service} from "@prisma/client";
 
 // TODO: Make get methods more secure
 @Injectable()
@@ -20,7 +21,6 @@ export class DeploymentService {
     private http: HttpService
   ) {}
   async create(email: string, projectId: string, serviceId: string) {
-    console.log(`URL: ${process.env.ORCHESTRATOR_URL}`)
     const res = await firstValueFrom(this.http.patch(
         `${process.env.ORCHESTRATOR_URL}/endpoint`,
         {
