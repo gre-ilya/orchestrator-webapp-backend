@@ -11,7 +11,7 @@ import { ServiceService } from '../service/service.service';
 import {HttpService} from "@nestjs/axios";
 import * as process from 'process';
 import {firstValueFrom} from "rxjs";
-import {Service} from "@prisma/client";
+import {Deployment, Service} from "@prisma/client";
 import {AxiosError} from "axios";
 
 // TODO: Make get methods more secure
@@ -21,15 +21,10 @@ export class DeploymentService {
     private prisma: PrismaService,
     private http: HttpService
   ) {}
-  async create(email: string, projectId: string, service: Service) {
-    let createdDeployment = await this.prisma.deployment.create({
-      data: {
-        serviceId: service.id
-      }
-    })
-    let res;
+
+  async sendDeployToOrchestratorService(service: Service, deployment: Deployment) {
     try {
-      res = await firstValueFrom(this.http.post(
+      await firstValueFrom(this.http.post(
           `${process.env.ORCHESTRATOR_URL}/api/deploys`,
           {
             repository: service.repository,
@@ -37,7 +32,7 @@ export class DeploymentService {
             internalPort: service.internalPort,
             nodesAmount: 1,
             mainDirectoryPath: './',
-            deploymentId: createdDeployment.id
+            deploymentId: deployment.id
           })
       );
     } catch (err) {
@@ -50,14 +45,22 @@ export class DeploymentService {
       } else {
         deployLogs = 'No connection with orchestrator web-service.'
       }
-      createdDeployment = await this.prisma.deployment.update({
-        where: { id: createdDeployment.id },
+      await this.prisma.deployment.update({
+        where: { id: deployment.id },
         data: {
           deployLogs: deployLogs,
           status: 'Failed'
         }
       });
     }
+  }
+  async create(email: string, projectId: string, service: Service) {
+    let createdDeployment = await this.prisma.deployment.create({
+      data: {
+        serviceId: service.id
+      }
+    })
+    this.sendDeployToOrchestratorService(service, createdDeployment);
     return createdDeployment;
   }
 
@@ -84,9 +87,9 @@ export class DeploymentService {
     serviceId: string,
     deploymentId: string,
     updateDeploymentDto: UpdateDeploymentDto,
-    isAdmin: boolean
+    userRole: string
   ) {
-    if (!isAdmin) {
+    if (userRole != 'Admin') {
       throw new ForbiddenException();
     }
     const deployment = await this.prisma.deployment.findMany({
