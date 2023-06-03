@@ -1,9 +1,10 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {HttpStatus, Injectable, InternalServerErrorException, NotFoundException} from '@nestjs/common';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectService } from '../project/project.service';
 import { DeploymentService } from '../deployment/deployment.service';
+import {AxiosError} from "axios/index";
 
 function getRandomInteger(min: number, max: number) {
   return Math.floor(
@@ -46,7 +47,14 @@ export class ServiceService {
     }
     createServiceDto.projectId = projectId;
     let createdService = await this.prisma.service.create({ data: await this.assignPort(createServiceDto) });
-    await this.deploymentService.create(email, projectId, createdService.id);
+    try {
+      await this.deploymentService.create(email, projectId, createdService);
+    } catch (err) {
+      console.log(err);
+      let errorResponse = { 'message': 'Internal error.' };
+      throw new InternalServerErrorException(errorResponse);
+    }
+
     return createdService;
   }
 

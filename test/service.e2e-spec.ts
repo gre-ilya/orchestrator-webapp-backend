@@ -257,7 +257,7 @@ describe('service (e2e)', () => {
       .expect(400);
   });
 
-  it('PATCH /')
+  // it('PATCH /')
 
   afterAll(async () => {
     try {

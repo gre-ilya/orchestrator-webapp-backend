@@ -12,6 +12,7 @@ import {HttpService} from "@nestjs/axios";
 import * as process from 'process';
 import {firstValueFrom} from "rxjs";
 import {Service} from "@prisma/client";
+import {AxiosError} from "axios";
 
 // TODO: Make get methods more secure
 @Injectable()
@@ -20,22 +21,33 @@ export class DeploymentService {
     private prisma: PrismaService,
     private http: HttpService
   ) {}
-  async create(email: string, projectId: string, serviceId: string) {
-    const res = await firstValueFrom(this.http.patch(
-        `${process.env.ORCHESTRATOR_URL}/endpoint`,
+  async create(email: string, projectId: string, service: Service) {
+    let createdDeployment = await this.prisma.deployment.create({
+      data: {
+        serviceId: service.id
+      }
+    })
+    const res = await firstValueFrom(this.http.post(
+        `${process.env.ORCHESTRATOR_URL}/api/deploys`,
         {
-          projectId: projectId,
-          serviceId: serviceId
+          repository: service.repository,
+          port: service.port,
+          internalPort: service.internalPort,
+          nodesAmount: 1,
+          mainDirectoryPath: './',
+          deploymentId: createdDeployment.id
         })
     );
     if (res.status == 500) {
-      throw new InternalServerErrorException();
+      createdDeployment = await this.prisma.deployment.update({
+        where: { id: createdDeployment.id },
+        data: {
+          deployLogs: 'Orchestrator internal error.',
+          status: 'Failed'
+        }
+      });
     }
-    return this.prisma.deployment.create({
-      data: {
-        serviceId: serviceId,
-      },
-    });
+    return createdDeployment;
   }
 
   async findAll(email: string, projectId: string, serviceId: string) {
