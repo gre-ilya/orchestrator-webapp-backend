@@ -104,7 +104,6 @@ export class DeploymentController {
     if (!uuid.validate(params.deployment)) {
       throw new NotFoundException();
     }
-    console.log(`=============${req.user.role}=================`)
     return this.deploymentService.update(
       req.user.email,
       params.project,

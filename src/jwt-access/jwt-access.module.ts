@@ -7,7 +7,7 @@ import * as process from 'process';
   imports: [
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET,
-      signOptions: { expiresIn: '30m' },
+      signOptions: { expiresIn: '60m' },
     }),
   ],
   providers: [JwtAccessService],

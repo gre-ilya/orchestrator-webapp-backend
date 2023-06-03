@@ -101,6 +101,12 @@ export class DeploymentService {
     if (!deployment.length) {
       throw new NotFoundException();
     }
+    if (updateDeploymentDto.deployLogs === '') {
+      delete updateDeploymentDto.deployLogs;
+    }
+    if (updateDeploymentDto.buildLogs === '') {
+      delete updateDeploymentDto.buildLogs;
+    }
     let updatedData = await this.prisma.deployment.updateMany({
       where: {
         id: deploymentId
