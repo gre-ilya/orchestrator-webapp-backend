@@ -27,22 +27,33 @@ export class DeploymentService {
         serviceId: service.id
       }
     })
-    const res = await firstValueFrom(this.http.post(
-        `${process.env.ORCHESTRATOR_URL}/api/deploys`,
-        {
-          repository: service.repository,
-          port: service.port,
-          internalPort: service.internalPort,
-          nodesAmount: 1,
-          mainDirectoryPath: './',
-          deploymentId: createdDeployment.id
-        })
-    );
-    if (res.status == 500) {
+    let res;
+    try {
+      res = await firstValueFrom(this.http.post(
+          `${process.env.ORCHESTRATOR_URL}/api/deploys`,
+          {
+            repository: service.repository,
+            port: service.port,
+            internalPort: service.internalPort,
+            nodesAmount: 1,
+            mainDirectoryPath: './',
+            deploymentId: createdDeployment.id
+          })
+      );
+    } catch (err) {
+      let deployLogs: string;
+      if (err.code ===  AxiosError.ERR_BAD_RESPONSE) {
+        deployLogs = 'Orchestrator internal error.';
+        if (err.response.data.message) {
+          deployLogs = err.response.data.message;
+        }
+      } else {
+        deployLogs = 'No connection with orchestrator web-service.'
+      }
       createdDeployment = await this.prisma.deployment.update({
         where: { id: createdDeployment.id },
         data: {
-          deployLogs: 'Orchestrator internal error.',
+          deployLogs: deployLogs,
           status: 'Failed'
         }
       });
