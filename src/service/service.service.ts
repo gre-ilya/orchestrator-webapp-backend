@@ -47,14 +47,7 @@ export class ServiceService {
     }
     createServiceDto.projectId = projectId;
     let createdService = await this.prisma.service.create({ data: await this.assignPort(createServiceDto) });
-    try {
-      await this.deploymentService.create(email, projectId, createdService);
-    } catch (err) {
-      console.log(err);
-      let errorResponse = { 'message': 'Internal error.' };
-      throw new InternalServerErrorException(errorResponse);
-    }
-
+    this.deploymentService.create(email, projectId, createdService);
     return createdService;
   }
 
