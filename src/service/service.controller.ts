@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
-  NotFoundException
+  NotFoundException, InternalServerErrorException
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -25,6 +25,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ServicePreviewEntity } from './entities/service-preview.entity';
 import * as uuid from 'uuid';
 import process from 'process';
+import {AxiosError} from "axios";
 
 @Controller('projects/:project/services')
 @ApiTags('services')
@@ -44,15 +45,23 @@ export class ServiceController {
     if (!uuid.validate(params.project)) {
       throw new NotFoundException();
     }
-
     createServiceDto.projectId = params.project;
-    return new ServiceEntity(
-      await this.serviceService.create(
-        req.user.email,
-        params.project,
-        createServiceDto,
-      ),
-    );
+    try {
+      return new ServiceEntity(
+          await this.serviceService.create(
+              req.user.email,
+              params.project,
+              createServiceDto,
+          ),
+      );
+    } catch (err) {
+      console.log(err)
+      let errorResponse = { 'message': 'Internal error.' };
+      if (err instanceof AxiosError) {
+        errorResponse.message = 'No connection with orchestrator.';
+      }
+      throw new InternalServerErrorException(errorResponse);
+    }
   }
 
   @Get()

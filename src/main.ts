@@ -10,8 +10,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('Median')
-    .setDescription('The Median API description')
+    .setTitle('Webapp backend REST API')
     .setVersion('0.1')
     .addBearerAuth()
     .build();

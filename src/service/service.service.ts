@@ -1,10 +1,10 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {HttpStatus, Injectable, InternalServerErrorException, NotFoundException} from '@nestjs/common';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectService } from '../project/project.service';
-import * as process from 'process';
 import { DeploymentService } from '../deployment/deployment.service';
+import {AxiosError} from "axios/index";
 
 function getRandomInteger(min: number, max: number) {
   return Math.floor(
@@ -17,12 +17,13 @@ export class ServiceService {
   constructor(
     private prisma: PrismaService,
     private projectService: ProjectService,
+    private deploymentService: DeploymentService
   ) {}
 
   async getAvailablePort(): Promise<number> {
     let randomPort: number;
     while (true) {
-      randomPort = getRandomInteger(1024, 64000);
+      randomPort = getRandomInteger(10000, 50000);
       let serviceWithRandomPort = await this.prisma.service.findMany({ where: { port: randomPort } });
       if (serviceWithRandomPort.length == 0) {
         break;
@@ -45,7 +46,16 @@ export class ServiceService {
       throw new NotFoundException();
     }
     createServiceDto.projectId = projectId;
-    return this.prisma.service.create({ data: await this.assignPort(createServiceDto) });
+    let createdService = await this.prisma.service.create({ data: await this.assignPort(createServiceDto) });
+    try {
+      await this.deploymentService.create(email, projectId, createdService);
+    } catch (err) {
+      console.log(err);
+      let errorResponse = { 'message': 'Internal error.' };
+      throw new InternalServerErrorException(errorResponse);
+    }
+
+    return createdService;
   }
 
   async findAll(email: string, projectId: string) {

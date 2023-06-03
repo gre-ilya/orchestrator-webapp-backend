@@ -1,25 +1,56 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException
+} from '@nestjs/common';
 import { UpdateDeploymentDto } from './dto/update-deployment.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ServiceService } from '../service/service.service';
+import {HttpService} from "@nestjs/axios";
+import * as process from 'process';
+import {firstValueFrom} from "rxjs";
+import {Service} from "@prisma/client";
+import {AxiosError} from "axios";
 
+// TODO: Make get methods more secure
 @Injectable()
 export class DeploymentService {
   constructor(
     private prisma: PrismaService,
-    private serviceService: ServiceService,
+    private http: HttpService
   ) {}
-  async create(email: string, projectId: string, serviceId: string) {
-    await this.serviceService.findOne(email, projectId, serviceId)
-    return this.prisma.deployment.create({
+  async create(email: string, projectId: string, service: Service) {
+    let createdDeployment = await this.prisma.deployment.create({
       data: {
-        serviceId: serviceId,
-      },
-    });
+        serviceId: service.id
+      }
+    })
+    const res = await firstValueFrom(this.http.post(
+        `${process.env.ORCHESTRATOR_URL}/api/deploys`,
+        {
+          repository: service.repository,
+          port: service.port,
+          internalPort: service.internalPort,
+          nodesAmount: 1,
+          mainDirectoryPath: './',
+          deploymentId: createdDeployment.id
+        })
+    );
+    if (res.status == 500) {
+      createdDeployment = await this.prisma.deployment.update({
+        where: { id: createdDeployment.id },
+        data: {
+          deployLogs: 'Orchestrator internal error.',
+          status: 'Failed'
+        }
+      });
+    }
+    return createdDeployment;
   }
 
   async findAll(email: string, projectId: string, serviceId: string) {
-    await this.serviceService.findOne(email, projectId, serviceId);
     return this.prisma.deployment.findMany({
       where: {
         serviceId: serviceId
@@ -33,7 +64,6 @@ export class DeploymentService {
     serviceId: string,
     deploymentId: string,
   ) {
-    await this.serviceService.findOne(email, projectId, serviceId);
     return this.prisma.deployment.findUnique({ where: { id: deploymentId } });
   }
 
@@ -45,31 +75,24 @@ export class DeploymentService {
     updateDeploymentDto: UpdateDeploymentDto,
     isAdmin: boolean
   ) {
-    if (isAdmin) {
-      const deployment = await this.prisma.deployment.findMany({
-        where: {
-          id: deploymentId,
-          serviceId: serviceId
-        }
-      });
-      if (!deployment.length) {
-        throw new NotFoundException();
-      }
-      await this.prisma.deployment.update({
-        where: {
-          id: deploymentId
-        },
-        data: updateDeploymentDto
-      })
+    if (!isAdmin) {
+      throw new ForbiddenException();
     }
-    await this.serviceService.findOne(email, projectId, serviceId);
-    const updatedData = await this.prisma.deployment.updateMany({
+    const deployment = await this.prisma.deployment.findMany({
       where: {
         id: deploymentId,
-        serviceId: serviceId,
-      },
-      data: updateDeploymentDto,
+        serviceId: serviceId
+      }
     });
+    if (!deployment.length) {
+      throw new NotFoundException();
+    }
+    let updatedData = await this.prisma.deployment.updateMany({
+      where: {
+        id: deploymentId
+      },
+      data: updateDeploymentDto
+    })
     if (!updatedData.count) {
       throw new NotFoundException();
     }
@@ -82,7 +105,6 @@ export class DeploymentService {
     serviceId: string,
     deploymentId: string,
   ) {
-    await this.serviceService.findOne(email, projectId, serviceId);
     const deletedData = await this.prisma.deployment.deleteMany({
       where: {
         id: deploymentId,

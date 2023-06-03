@@ -133,11 +133,11 @@ describe('project (e2e)', () => {
     expect(uuid.validate(req.body[0].id)).toBeTruthy();
   });
 
-  it('GET /projects/{not-uuid} Should return 400.', () => {
+  it('GET /projects/{not-uuid} Should return 404.', () => {
     return request(app.getHttpServer())
       .get('/projects/not-uuid')
       .set('Authorization', accessToken)
-      .expect(400);
+      .expect(404);
   });
 
   it('GET /projects/{not-existing-project} Should return 404.', async () => {
@@ -163,12 +163,12 @@ describe('project (e2e)', () => {
       .expect(404);
   });
 
-  it('PATCH /projects/{not-uuid} Should return 400.', () => {
+  it('PATCH /projects/{not-uuid} Should return 404.', () => {
     return request(app.getHttpServer())
       .patch('/projects/not-uuid')
       .set('Authorization', accessToken)
       .send({ name: 'newname' })
-      .expect(400);
+      .expect(404);
   });
 
   it('PATCH /projects/{not-existing-project} Should return 404.', () => {
