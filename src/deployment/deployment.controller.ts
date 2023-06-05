@@ -25,14 +25,14 @@ import { DeploymentEntity } from './entities/deployment.entity';
 import { DeploymentPreviewEntity } from './entities/deployment-preview.entity';
 import * as uuid from 'uuid';
 
-@Controller('projects/:project/services/:service/deployments')
+@Controller()
 @ApiTags('deployments')
 export class DeploymentController {
   constructor(
       private deploymentService: DeploymentService,
   ) {}
 
-  @Post()
+  @Post('projects/:project/services/:service/deployments')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: DeploymentPreviewEntity })
@@ -52,7 +52,7 @@ export class DeploymentController {
     );
   }
 
-  @Get()
+  @Get('projects/:project/services/:service/deployments')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: [DeploymentPreviewEntity] })
@@ -68,7 +68,7 @@ export class DeploymentController {
     );
   }
 
-  @Get(':deployment')
+  @Get('projects/:project/services/:service/deployments/:deployment')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: DeploymentEntity })
@@ -89,13 +89,11 @@ export class DeploymentController {
     );
   }
 
-  @Patch(':deployment')
+  @Patch('deployments/:deployment')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse()
   @ApiParam({ name: 'deployment', required: true })
-  @ApiParam({ name: 'service', required: true })
-  @ApiParam({ name: 'project', required: true })
   update(
     @Request() req,
     @Param() params,
@@ -104,18 +102,15 @@ export class DeploymentController {
     if (!uuid.validate(params.deployment)) {
       throw new NotFoundException();
     }
-    console.log(`=============${req.user.role}=================`)
     return this.deploymentService.update(
       req.user.email,
-      params.project,
-      params.service,
       params.deployment,
       updateDeploymentDto,
         req.user.role
     );
   }
 
-  @Delete(':deployment')
+  @Delete('projects/:project/services/:service/deployments/:deployment')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse()

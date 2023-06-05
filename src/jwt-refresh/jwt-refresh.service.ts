@@ -79,7 +79,8 @@ export class JwtRefreshService {
     }
     const email = this.jwtService.decode(jti)['email'];
     await this.killSessions(email);
-    const role = this.jwtService.decode(jti)['role'];
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    const role = user.role;
     return {
       accessToken: await this.jwtAccessService.createAccessToken(email, role),
       refreshToken: await this.createRefreshToken(email, role),
