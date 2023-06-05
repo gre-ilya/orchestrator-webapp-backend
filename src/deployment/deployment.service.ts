@@ -83,8 +83,6 @@ export class DeploymentService {
 
   async update(
     email: string,
-    projectId: string,
-    serviceId: string,
     deploymentId: string,
     updateDeploymentDto: UpdateDeploymentDto,
     userRole: string
@@ -95,7 +93,6 @@ export class DeploymentService {
     const deployment = await this.prisma.deployment.findMany({
       where: {
         id: deploymentId,
-        serviceId: serviceId
       }
     });
     if (!deployment.length) {
