@@ -110,6 +110,13 @@ export class DeploymentService {
       },
       data: updateDeploymentDto
     })
+    let serviceId;
+    try {
+      serviceId = (await this.prisma.deployment.findUnique({ where: { id: deploymentId } })).serviceId;
+    } catch (err) {
+      throw new NotFoundException();
+    }
+    await this.prisma.service.updateMany({ where: { id: serviceId }, data: { status: updateDeploymentDto.status }});
     if (!updatedData.count) {
       throw new NotFoundException();
     }
