@@ -22,39 +22,13 @@ export class DeploymentService {
     private http: HttpService
   ) {}
 
-  async sendDeployToOrchestratorService(service: Service, deployment: Deployment) {
+  async create(email: string, projectId: string, serviceId: string) {
+    let service: Service;
     try {
-      await firstValueFrom(this.http.post(
-          `${process.env.ORCHESTRATOR_URL}/api/deploys`,
-          {
-            repository: service.repository,
-            port: service.port,
-            internalPort: service.internalPort,
-            nodesAmount: 1,
-            mainDirectoryPath: './',
-            deploymentId: deployment.id
-          })
-      );
+      service = await this.prisma.service.findUnique({where: {id: serviceId}});
     } catch (err) {
-      let deployLogs: string;
-      if (err.code ===  AxiosError.ERR_BAD_RESPONSE) {
-        deployLogs = 'Orchestrator internal error.';
-        if (err.response.data.message) {
-          deployLogs = err.response.data.message;
-        }
-      } else {
-        deployLogs = 'No connection with orchestrator web-service.'
-      }
-      await this.prisma.deployment.update({
-        where: { id: deployment.id },
-        data: {
-          deployLogs: deployLogs,
-          status: 'Failed'
-        }
-      });
+      throw new NotFoundException();
     }
-  }
-  async create(email: string, projectId: string, service: Service) {
     let createdDeployment = await this.prisma.deployment.create({
       data: {
         serviceId: service.id
@@ -129,15 +103,66 @@ export class DeploymentService {
     serviceId: string,
     deploymentId: string,
   ) {
-    const deletedData = await this.prisma.deployment.deleteMany({
-      where: {
-        id: deploymentId,
-        serviceId: serviceId,
-      },
-    });
-    if (!deletedData.count) {
+    let service: Service;
+    try {
+      service = await this.prisma.service.findUnique({where: {id: serviceId}});
+    } catch (err) {
       throw new NotFoundException();
     }
+    this.deleteDeployFromOrchestratorService(service.port, deploymentId);
     return HttpStatus.OK;
+  }
+
+  async sendDeployToOrchestratorService(service: Service, deployment: Deployment) {
+    try {
+      await firstValueFrom(this.http.post(
+          `${process.env.ORCHESTRATOR_URL}/api/deploys`,
+          {
+            repository: service.repository,
+            port: service.port,
+            internalPort: service.internalPort,
+            nodesAmount: 1,
+            mainDirectoryPath: './',
+            deploymentId: deployment.id
+          })
+      );
+    } catch (err) {
+      await this.handleError(err, deployment.id);
+    }
+  }
+
+  async deleteDeployFromOrchestratorService(port: number, deploymentId: string) {
+    try {
+      await firstValueFrom(this.http.delete(
+          `${process.env.ORCHESTRATOR_URL}/api/deploys`,
+          {
+            data: {
+              port: port,
+              deploymentId: deploymentId
+            }
+          },
+      ))
+    } catch (err) {
+      await this.handleError(err, deploymentId);
+    }
+  }
+
+  async handleError(err, deploymentId: string) {
+    let buildLogs: string;
+    if (err.code ===  AxiosError.ERR_BAD_RESPONSE) {
+      buildLogs = 'Orchestrator internal error.';
+      if (err.response.data.message) {
+        buildLogs = err.response.data.message;
+      }
+    } else {
+      buildLogs = 'No connection with orchestrator web-service.'
+    }
+    await this.prisma.deployment.update({
+      where: { id: deploymentId },
+      data: {
+        buildLogs: buildLogs,
+        status: 'Failed'
+      }
+    });
   }
 }

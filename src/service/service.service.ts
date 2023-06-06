@@ -47,7 +47,7 @@ export class ServiceService {
     }
     createServiceDto.projectId = projectId;
     let createdService = await this.prisma.service.create({ data: await this.assignPort(createServiceDto) });
-    this.deploymentService.create(email, projectId, createdService);
+    this.deploymentService.create(email, projectId, createdService.id);
     return createdService;
   }
 
